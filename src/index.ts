@@ -1,6 +1,6 @@
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { setupPageContentResource } from "./resources/pageContent.js";
 
 async function main() {
   
@@ -9,29 +9,9 @@ async function main() {
     name: "Demo",
     version: "1.0.0"
   });
-
-  // Add an addition tool
-  server.tool("add",
-    { a: z.number(), b: z.number() },
-    async ({ a, b }) => ({
-      content: [{ type: "text", text: String(a + b) }]
-    })
-  );
-
-  // Add a dynamic greeting resource
-  const resource = new ResourceTemplate("greeting://{name}", { list: undefined });
-console.log(resource);
-
-  server.resource(
-    "greeting",
-    resource,
-    async (uri, { name }) => ({
-      contents: [{
-        uri: uri.href,
-        text: `Hello, ${name}!`
-      }]
-    })
-  );
+  
+  // Add Resources 
+  setupPageContentResource(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();

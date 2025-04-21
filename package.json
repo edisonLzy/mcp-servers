@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsx src/index.ts --outfile dist/index.js"
+    "dev": "tsx src/index.ts",
+    "inspector": "pnpx @modelcontextprotocol/inspector pnpm run dev"
   },
   "keywords": [],
   "author": "evan",

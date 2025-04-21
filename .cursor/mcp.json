@@ -1,10 +1,9 @@
 {
     "mcpServers": {
       "confluence": {
-        "command": "pnpm",
+        "command": "tsx",
         "args": [
-          "tsx",
-          "src/index.ts"
+          "/Users/zhiyu/Desktop/AI/mac-confluence/src/index.ts"
         ]
       }
     }
