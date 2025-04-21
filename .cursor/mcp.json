@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+      "confluence": {
+        "command": "pnpm",
+        "args": [
+          "tsx",
+          "src/index.ts"
+        ]
+      }
+    }
+  }
+  

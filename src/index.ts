@@ -1,42 +1,41 @@
-import { ConfluenceApi } from './confluenceApi';
-import dotenv from 'dotenv';
-import { html2markdown } from './html2markdown';
-
-// Load environment variables
-dotenv.config();
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
 
 async function main() {
-  try {
-    const confluenceApi = new ConfluenceApi();
-    const pageId = process.env.CONFLUENCE_PAGE_ID || '1484645889';
-    
-    console.log(`Fetching Confluence page with ID: ${pageId}`);
-    
-    const page = await confluenceApi.getPageContent(pageId);
-    
-    console.log('\n=== Page Information ===');
-    console.log(`Title: ${page.title}`);
-    console.log(`Version: ${page.version.number}`);
-    
-    // Get HTML content
-    const htmlContent = page.body.storage.value;
-    console.log('\n=== Page HTML Content');
-    console.log(htmlContent);
+  
+  // Create an MCP server
+  const server = new McpServer({
+    name: "Demo",
+    version: "1.0.0"
+  });
 
-    // Convert HTML to Markdown
-    const markdownContent = await html2markdown(htmlContent);
-    console.log('\n=== Page Markdown Content');
-    console.log(markdownContent);
-    
-    // Get plain text content
-    const plainTextContent = confluenceApi.extractTextFromHtml(htmlContent);
-    console.log('\n=== Page Plain Text Content');
-    console.log(plainTextContent);
-    
-  } catch (error) {
-    console.error('Error in main function:', error);
-  }
+  // Add an addition tool
+  server.tool("add",
+    { a: z.number(), b: z.number() },
+    async ({ a, b }) => ({
+      content: [{ type: "text", text: String(a + b) }]
+    })
+  );
+
+  // Add a dynamic greeting resource
+  const resource = new ResourceTemplate("greeting://{name}", { list: undefined });
+console.log(resource);
+
+  server.resource(
+    "greeting",
+    resource,
+    async (uri, { name }) => ({
+      contents: [{
+        uri: uri.href,
+        text: `Hello, ${name}!`
+      }]
+    })
+  );
+
+  // Start receiving messages on stdin and sending messages on stdout
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
 }
 
-// Run the main function
-main().then(() => console.log('Done!'));
+main().catch(console.error);
