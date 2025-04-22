@@ -1,17 +1,16 @@
 {
-  "name": "mac-confluence",
+  "name": "mcp-confluence",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
-    "inspector": "pnpx @modelcontextprotocol/inspector pnpm run dev",
+    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/mcp_logger.ts tsx src/index.ts",
     "format": "biome format",
     "format:fix": "biome format --write",
     "test": "vitest"
   },
-  "keywords": [],
   "author": "evan",
   "license": "ISC",
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
@@ -27,13 +26,14 @@
     "typescript": "^5.8.2",
     "vitest": "^3.1.2"
   },
+  "keywords": [
+    "mcp",
+    "logger",
+    "typescript"
+  ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.1",
-    "rehype-parse": "^9.0.1",
-    "rehype-remark": "^10.0.0",
-    "remark-gfm": "^4.0.1",
-    "remark-stringify": "^11.0.0",
-    "unified": "^11.0.5",
-    "zod": "^3.24.3"
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.0",
+    "buffer": "^6.0.3"
   }
 }
