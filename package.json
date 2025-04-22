@@ -6,13 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
-    "inspector": "pnpx @modelcontextprotocol/inspector pnpm run dev"
+    "inspector": "pnpx @modelcontextprotocol/inspector pnpm run dev",
+    "format": "biome format",
+    "format:fix": "biome format --write",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "evan",
   "license": "ISC",
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@modelcontextprotocol/inspector": "^0.10.2",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -20,7 +24,8 @@
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.2"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.1",
