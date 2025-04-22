@@ -1,10 +1,12 @@
 {
     "mcpServers": {
       "confluence": {
-        "command": "pnpm",
+        "command": "pnpx",
         "args": [
           "tsx",
-          "src/index.ts"
+          "/Users/evan/Desktop/coding/mcp-confluence/src/mcp_logger.ts",
+          "tsx",
+          "/Users/evan/Desktop/coding/mcp-confluence/src/index.ts"
         ]
       }
     }

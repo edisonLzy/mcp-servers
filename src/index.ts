@@ -20,8 +20,7 @@ async function main() {
 
   // Add a dynamic greeting resource
   const resource = new ResourceTemplate("greeting://{name}", { list: undefined });
-console.log(resource);
-
+  
   server.resource(
     "greeting",
     resource,
