@@ -1,0 +1,196 @@
+---
+description: the rule about how to create a MCP server in current workspace
+globs: 
+alwaysApply: false
+---
+# MCP Server 快速生成规则
+
+这个规则用于快速创建标准的 MCP (Model Context Protocol) Server 项目结构。
+
+## 使用方法
+
+当用户请求创建新的 MCP server 时，按照以下目录结构和文件模板进行创建：
+
+## 项目结构
+
+```
+packages/{server-name}/
+├── src/
+│   ├── index.ts                 # 主入口文件
+│   ├── tools/                   # 工具函数目录
+│   │   └── example.ts           # 示例工具文件
+│   └── client.ts                # 客户端文件（可选）
+├── tests/                       # 测试目录
+│   └── index.test.ts            # 测试文件
+├── package.json                 # 包配置文件
+├── tsconfig.json               # TypeScript 配置
+├── vitest.config.ts            # 测试配置
+└── README.md                   # 文档说明
+```
+
+## 文件模板
+
+### package.json 模板
+```json
+{
+  "name": "{server-name}",
+  "version": "0.0.1",
+  "description": "{Server Description}",
+  "type": "module",
+  "main": "src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts"
+  },
+  "keywords": [
+    "mcp",
+    "typescript"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
+    "dotenv": "^16.5.0",
+    "zod": "catalog:"
+  }
+}
+```
+
+### src/index.ts 模板
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { registerExampleTool } from './tools/example.js';
+
+async function main() {
+  // Create an MCP server
+  const server = new McpServer(
+    {
+      name: '{Server Name}',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    },
+  );
+
+  // Add tools
+  registerExampleTool(server);
+
+  // Start receiving messages on stdin and sending messages on stdout
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+```
+
+### src/tools/example.ts 模板
+```typescript
+import { z } from 'zod';
+import { ConfluenceClient } from '../confluenceClient';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+const exampleToolSchema = z.object({
+  // 定义工具参数结构
+});
+
+export function registerExampleTool(server: McpServer) {
+  server.addTool(
+    '{tool name}',
+    '{tool description}',
+    exampleToolSchema.shape,
+    async (request) => {
+      try {
+        // 实现工具逻辑
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Tool execution result',
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+}
+```
+
+### tsconfig.json 模板
+```json
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*", "tests/**/*"]
+}
+```
+
+### vitest.config.ts 模板
+```typescript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+  },
+});
+```
+
+### README.md 模板
+```markdown
+# {Server Name} MCP Server
+
+{Server Description}
+
+## Usage
+
+Use the MCP inspector to test this server:
+
+\`\`\`bash
+pnpm inspector
+\`\`\`
+
+## Tools
+
+- `example-tool`: Example tool description
+```
+
+## 规则要点
+
+1. **使用 pnpm 包管理器**: 所有命令使用 `pnpm` 而不是 `npm` 或 `yarn`
+2. **Monorepo 结构**: 所有 MCP server 放在 `packages/` 目录下
+3. **TypeScript 支持**: 所有文件使用 TypeScript
+4. **标准化命名**: 
+   - 包名使用 kebab-case: `example-mcp`
+   - 工具名使用 kebab-case: `example-tool`
+   - 文件名使用 camelCase: `exampleTool.ts`
+5. **依赖管理**: 
+   - 使用 catalog 模式管理通用依赖版本
+   - MCP SDK 版本统一管理
+6. **测试支持**: 每个 MCP server 都包含 vitest 测试配置
+7. **开发工具**: 包含 inspector 脚本用于调试
+
+## 生成步骤
+
+当创建新的 MCP server 时：
+
+1. 在 `packages/` 目录下创建新的服务器目录
+2. 根据模板创建所有必要文件
+3. 将 `{server-name}` 等占位符替换为实际值
+4. 提示用户运行 `pnpm install` 安装依赖
+5. 提示用户可以使用 `pnpm inspector` 测试服务器
+
+这个规则确保所有 MCP server 都遵循统一的结构和最佳实践。 
