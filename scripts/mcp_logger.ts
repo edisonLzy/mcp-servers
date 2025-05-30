@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import type { spawn, ChildProcessWithoutNullStreams } from "node:child_process";
-import * as fs from "node:fs";
-import * as path from "node:path";
-import * as process from "node:process";
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+import type { ChildProcessWithoutNullStreams } from 'node:child_process';
 
 // --- 配置 ---
 const LOG_FILE = path.join(path.dirname(__filename), 'mcp_io.log');
@@ -42,7 +43,7 @@ try {
       let inputStr: string;
       try {
         inputStr = data.toString('utf-8');
-      } catch (e) {
+      } catch {
         inputStr = `[Non-UTF8 data, ${data.length} bytes]\n`;
       }
       logStream.write(`输入: ${inputStr}`);
@@ -54,7 +55,9 @@ try {
     } catch (e) {
       try {
         logStream.write(`!!! STDIN 转发错误: ${e}\n`);
-      } catch {} // 忽略记录错误时的错误
+      } catch {
+        console.error(`!!! STDIN 转发错误: ${e}\n`);
+      }
     }
   });
 
@@ -68,7 +71,9 @@ try {
     } catch (e) {
       try {
         logStream.write(`!!! 关闭目标 STDIN 时出错: ${e}\n`);
-      } catch {} // 忽略记录错误时的错误
+      } catch {
+        console.error(`!!! 关闭目标 STDIN 时出错: ${e}\n`);
+      }
     }
   });
 
@@ -80,7 +85,7 @@ try {
         let outputStr: string;
         try {
           outputStr = data.toString('utf-8');
-        } catch (e) {
+        } catch {
           outputStr = `[Non-UTF8 data, ${data.length} bytes]\n`;
         }
         logStream.write(`输出: ${outputStr}`);
@@ -90,7 +95,9 @@ try {
       } catch (e) {
         try {
           logStream.write(`!!! STDOUT 转发错误: ${e}\n`);
-        } catch {} // 忽略记录错误时的错误
+        } catch {
+          console.error(`!!! STDOUT 转发错误: ${e}\n`);
+        }
       }
     });
   }
@@ -103,7 +110,7 @@ try {
         let errorStr: string;
         try {
           errorStr = data.toString('utf-8');
-        } catch (e) {
+        } catch {
           errorStr = `[Non-UTF8 data, ${data.length} bytes]\n`;
         }
         logStream.write(`STDERR: ${errorStr}`);
@@ -113,7 +120,9 @@ try {
       } catch (e) {
         try {
           logStream.write(`!!! STDERR 转发错误: ${e}\n`);
-        } catch {} // 忽略记录错误时的错误
+        } catch {
+          console.error(`!!! STDERR 转发错误: ${e}\n`);
+        } // 忽略记录错误时的错误
       }
     });
   }
@@ -125,7 +134,9 @@ try {
     try {
       logStream.write(`进程退出，代码: ${exitCode}\n`);
       logStream.end();
-    } catch {} // 忽略记录错误时的错误
+    } catch {
+      console.error('!!! 记录错误时的错误\n');
+    } // 忽略记录错误时的错误
     
     // 使用子进程的退出代码退出
     process.exit(exitCode);
@@ -136,11 +147,15 @@ try {
     console.error(`MCP Logger 错误: ${err.message}`);
     try {
       logStream.write(`!!! MCP Logger 错误: ${err.message}\n`);
-    } catch {} // 忽略记录错误时的错误
+    } catch {
+      console.error(`!!! 记录错误时的错误: ${err.message}\n`);
+    } // 忽略记录错误时的错误
     
     try {
       logStream.end();
-    } catch {} // 忽略关闭日志时的错误
+    } catch {
+      console.error('!!! 关闭日志时的错误\n');
+    } // 忽略关闭日志时的错误
     
     process.exit(1); // 指示日志记录器失败
   });
@@ -153,7 +168,9 @@ try {
   if (childProcess && !childProcess.killed) {
     try {
       childProcess.kill();
-    } catch {} // 忽略终止错误
+    } catch {
+      console.error('!!! 终止错误\n');
+    } // 忽略终止错误
   }
   
   process.exit(exitCode);

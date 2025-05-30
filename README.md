@@ -1,3 +1,2 @@
-# Confluence MCP
+# MCP Servers Repo
 
-A utility for interacting with Confluence pages.

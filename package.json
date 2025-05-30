@@ -1,39 +1,40 @@
 {
-  "name": "mcp-confluence",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "mcp-servers",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MCP Servers",
+  "license": "MIT",
+  "author": "",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/mcp_logger.ts tsx src/index.ts",
-    "format": "biome format",
-    "format:fix": "biome format --write",
-    "test": "vitest"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "prepare": "husky",
+    "commit-msg": "commitlint --edit"
   },
-  "author": "evan",
-  "license": "ISC",
-  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@modelcontextprotocol/inspector": "^0.10.2",
-    "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.4",
-    "@types/node": "^22.13.13",
-    "axios": "^1.8.4",
-    "dotenv": "^16.4.7",
-    "tsx": "^4.19.3",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@eslint/compat": "^1.2.7",
+    "@eslint/js": "^9.23.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
+    "@swc/core": "^1.11.11",
+    "@types/node": "^20.17.25",
+    "eslint": "^9.23.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.2",
-    "vitest": "^3.1.2"
+    "typescript-eslint": "^8.27.0",
+    "unplugin-isolated-decl": "^0.13.5",
+    "vitest": "^3.0.9"
   },
-  "keywords": [
-    "mcp",
-    "logger",
-    "typescript"
-  ],
-  "dependencies": {
-    "axios": "^0.27.2",
-    "dotenv": "^16.0.0",
-    "buffer": "^6.0.3"
-  }
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.7.0+sha512.6b865ad4b62a1d9842b61d674a393903b871d9244954f652b8842c2b553c72176b278f64c463e52d40fff8aba385c235c8c9ecf5cc7de4fd78b8bb6d49633ab6"
 }
