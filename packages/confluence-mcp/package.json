@@ -1,7 +1,7 @@
 {
-  "name": "confluence-mcp",
+  "name": "@mcp-servers/confluence",
   "version": "0.0.1",
-  "description": "Confluence MCP",
+  "description": "Confluence MCP Server",
   "type": "module",
   "main": "src/index.ts",
   "files": [

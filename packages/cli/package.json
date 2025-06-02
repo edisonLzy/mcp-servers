@@ -1,0 +1,26 @@
+{
+  "name": "@mcp-servers/cli",
+  "version": "0.0.1",
+  "description": "CLI for MCP Servers",
+  "type": "module",
+  "bin": {
+    "clirk": "./dist/index.js"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.0",
+    "picocolors": "^1.1.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "tsx": "^4.19.4"
+  }
+}
