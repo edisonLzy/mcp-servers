@@ -76,31 +76,6 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@20.17.25)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.7.0)
 
-  packages/cli:
-    dependencies:
-      '@clack/prompts':
-        specifier: ^0.11.0
-        version: 0.11.0
-      commander:
-        specifier: ^14.0.0
-        version: 14.0.0
-      fs-extra:
-        specifier: ^11.3.0
-        version: 11.3.0
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.42
-    devDependencies:
-      '@types/fs-extra':
-        specifier: ^11.0.4
-        version: 11.0.4
-      tsx:
-        specifier: ^4.19.4
-        version: 4.19.4
-
   packages/confluence-mcp:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -137,6 +112,31 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+
+  packages/core:
+    dependencies:
+      '@clack/prompts':
+        specifier: ^0.11.0
+        version: 0.11.0
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.42
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
 
 packages:
 

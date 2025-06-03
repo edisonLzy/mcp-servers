@@ -1,10 +1,10 @@
 {
-  "name": "@mcp-servers/cli",
+  "name": "@mcp-servers/core",
   "version": "0.0.1",
-  "description": "CLI for MCP Servers",
+  "description": "Core for MCP Servers",
   "type": "module",
   "bin": {
-    "clirk": "./dist/index.js"
+    "clirk": "./src/cli/entry.ts"
   },
   "scripts": {
     "test": "vitest run"

@@ -1,7 +1,7 @@
 #!/usr/bin/env -S pnpm tsx
 
-import { Cli } from './cli';
 import installCommand from './commands/install';
+import { Cli } from '.';
 
 const cli = new Cli({
   name: 'mcp-servers',
