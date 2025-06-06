@@ -99,7 +99,7 @@ const exampleToolSchema = z.object({
 });
 
 export function registerExampleTool(server: McpServer) {
-  server.addTool(
+  server.tool(
     '{tool name}',
     '{tool description}',
     exampleToolSchema.shape,
