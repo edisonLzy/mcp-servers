@@ -1,6 +1,6 @@
 import z from 'zod';
 import { Command } from 'commander';
-import { runAction } from '../utils/runAction';
+import { runAction } from '../runAction';
 
 const optionsSchema = z.object({
   global: z.boolean().optional().default(false),
