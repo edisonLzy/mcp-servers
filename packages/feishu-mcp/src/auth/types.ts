@@ -7,10 +7,7 @@ export interface TokenInfo {
   clientId?: string;
 }
 
-export interface StoredTokenData {
-  tokens: { [tokenKey: string]: TokenInfo };
-  appTokens: { [appId: string]: string }; // Maps appId to access token
-}
+export type StoredTokenData = TokenInfo;
 
 export interface OAuthServerOptions {
   appId: string;

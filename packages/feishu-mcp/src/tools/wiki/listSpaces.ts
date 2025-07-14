@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { FeishuClient } from '../../client/feishuClient.js';
+import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 const listWikiSpacesSchema = z.object({});
@@ -7,7 +7,7 @@ const listWikiSpacesSchema = z.object({});
 export function registerListWikiSpacesTool(server: McpServer, client: FeishuClient) {
   server.tool(
     'list-wiki-spaces',
-    'Get list of all Wiki spaces accessible to the authenticated user/app',
+    'Get list of all Wiki spaces accessible to the authenticated user',
     listWikiSpacesSchema.shape,
     async () => {
       try {

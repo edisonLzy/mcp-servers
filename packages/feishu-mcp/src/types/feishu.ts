@@ -3,18 +3,7 @@ export interface FeishuConfig {
   appId: string;
   appSecret: string;
   baseURL: string;
-  redirectUri?: string; // OAuth redirect URI (optional, auto-generated if not provided)
-  oauthDomain?: string; // OAuth domain (defaults to https://open.feishu.cn)
-  oauthPort?: number; // OAuth callback server port (defaults to 3000)
-  oauthHost?: string; // OAuth callback server host (defaults to localhost)
-  scopes?: string[]; // OAuth scopes
   tokenStoragePath?: string; // Custom token storage path
-  autoStartOAuthServer?: boolean; // Whether to auto-start OAuth server (defaults to true)
-}
-
-export interface AccessToken {
-  token: string;
-  expires_at: number;
 }
 
 // Wiki types
@@ -42,7 +31,7 @@ export interface Document {
   url?: string;
 }
 
-// API Response types - Standard Feishu API response structure
+// Base response types
 export interface FeishuResponse {
   code: number;
   msg: string;
@@ -60,6 +49,7 @@ export interface ListNodesResponse {
   page_token?: string;
 }
 
+// Request types
 export interface CreateDocumentRequest {
   title: string;
   content?: string;
@@ -74,32 +64,35 @@ export interface UpdateDocumentRequest {
   revision?: number;
 }
 
+// User types
+export interface UserInfo {
+  user_id: string;
+  name: string;
+  email?: string;
+  mobile?: string;
+  employee_id?: string;
+  employee_type?: string;
+  status?: {
+    is_frozen: boolean;
+    is_resigned: boolean;
+    is_activated: boolean;
+    is_exited: boolean;
+    is_unjoin: boolean;
+  };
+  avatar?: {
+    avatar_72?: string;
+    avatar_240?: string;
+    avatar_640?: string;
+    avatar_origin?: string;
+  };
+  department_ids?: string[];
+  open_id?: string;
+  union_id?: string;
+}
+
 // Error types
 export interface FeishuError {
   code: string;
   message: string;
   details?: Record<string, any>;
-}
-
-// OAuth types
-export interface OAuthAuthorizationOptions {
-  scope?: string;
-  state?: string;
-  codeChallenge?: string;
-  codeChallengeMethod?: 'S256' | 'plain';
-}
-
-export interface OAuthCallbackParams {
-  code?: string;
-  error?: string;
-  state?: string;
-}
-
-// Authentication mode types
-export type AuthenticationMode = 'manual' | 'auto';
-
-export interface AuthenticationOptions {
-  mode?: AuthenticationMode; // 'manual' requires user to handle OAuth flow, 'auto' handles it automatically
-  timeout?: number; // OAuth authorization timeout in milliseconds (default: 120000)
-  openBrowser?: boolean; // Whether to automatically open browser for OAuth (default: true in 'auto' mode)
 }

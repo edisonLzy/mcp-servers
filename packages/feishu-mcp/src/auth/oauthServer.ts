@@ -19,7 +19,6 @@ export class OAuthServer {
     this.tokenStore = tokenStore;
     this.options = {
       callbackPath: '/callback',
-      scopes: ['contact:contact', 'bitable:app:readonly', 'wiki:wiki:readonly', 'docx:document'],
       ...options
     };
     
@@ -173,8 +172,8 @@ export class OAuthServer {
 
   async authorize(): Promise<AuthorizationResult> {
     // Check if we already have a valid token
-    const existingToken = await this.tokenStore.getValidToken(this.options.appId);
-    if (existingToken) {
+    const existingToken = await this.tokenStore.getValidToken();
+    if (existingToken && existingToken.appId === this.options.appId) {
       return {
         accessToken: existingToken.accessToken,
         needsAuthorization: false
@@ -219,8 +218,8 @@ export class OAuthServer {
   }
 
   async refreshToken(appId: string): Promise<string | null> {
-    const token = await this.tokenStore.getToken(appId);
-    if (!token || !token.refreshToken) {
+    const token = await this.tokenStore.getToken();
+    if (!token || !token.refreshToken || token.appId !== appId) {
       return null;
     }
 
@@ -267,7 +266,7 @@ export class OAuthServer {
     } catch (error) {
       console.error('Token refresh failed:', error);
       // Remove invalid token
-      await this.tokenStore.removeToken(appId);
+      await this.tokenStore.removeToken();
       return null;
     }
   }

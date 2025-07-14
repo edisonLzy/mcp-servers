@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { FeishuClient } from '../src/client/feishuClient.js';
+import { FeishuClient } from '../src/feishuClient.js';
 
 describe('FeishuClient', () => {
   let client: FeishuClient;
@@ -15,12 +15,6 @@ describe('FeishuClient', () => {
   describe('constructor', () => {
     it('should create client with config', () => {
       expect(client).toBeDefined();
-    });
-  });
-
-  describe('authentication', () => {
-    it('should have getTenantAccessToken method', () => {
-      expect(typeof client.getTenantAccessToken).toBe('function');
     });
   });
 

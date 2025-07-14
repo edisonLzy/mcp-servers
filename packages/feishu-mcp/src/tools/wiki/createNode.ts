@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { FeishuClient } from '../../client/feishuClient.js';
+import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 const createWikiNodeSchema = z.object({

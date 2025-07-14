@@ -6,7 +6,7 @@ A Model Context Protocol (MCP) server for integrating with Feishu/Lark Wiki and 
 
 - **Wiki Management**: List, browse, and create wiki spaces and nodes
 - **Document Operations**: Create, read, and update Feishu documents
-- **Authentication**: Support for both app and user tokens
+- **Authentication**: Secure token management with automatic OAuth flow
 - **Error Handling**: Comprehensive error handling with user-friendly messages
 - **Extensible Architecture**: Modular design for easy feature expansion
 
@@ -34,13 +34,81 @@ pnpm install
 pnpm build
 ```
 
-## Configuration
+## CLI Usage
 
-Set the following environment variables:
+The Feishu MCP server includes a command-line interface for easy management:
+
+### Login
+
+Store your Feishu app credentials securely:
 
 ```bash
-# Required
-FEISHU_APP_ID=your_app_id
+# Interactive login (recommended)
+npm run cli -- login
+
+# The login command will prompt for your App ID and App Secret
+# and handle OAuth authentication automatically
+```
+
+### Start Server
+
+Start the MCP server after logging in:
+
+```bash
+# Start with stdio transport (default, for Claude Desktop)
+npm run cli -- serve
+
+# Start with HTTP transport
+npm run cli -- serve --http --port 3000
+
+# Development mode with inspector
+npm run cli -- serve --dev
+```
+
+### Logout
+
+Clear stored credentials:
+
+```bash
+# Logout from current app
+npm run cli -- logout
+
+# Logout from specific app
+npm run cli -- logout --app-id your_app_id
+
+# Clear all stored credentials
+npm run cli -- logout --all
+```
+
+### Whoami
+
+Display information about the currently logged-in user:
+
+```bash
+# Show current user information
+pnpm run whoami
+```
+
+This command displays:
+- User name and ID
+- Email and mobile (if available)
+- Employee ID and type
+- Account status
+- Avatar URL
+- Department associations
+
+**Note**: This command requires your Feishu app to have contact permissions. If you see a permission error (99991679), you need to add one of these permissions to your app in the Feishu Admin Console:
+- `contact:contact.base:readonly` (Contact basic information)
+- `contact:contact:readonly` (Contact information)
+
+After adding permissions, you may need to re-authorize the app by logging in again.
+
+## Configuration
+
+### Environment Variables (Optional)
+
+```bash
+# Only required during login, not for runtime
 FEISHU_APP_SECRET=your_app_secret
 
 # Optional

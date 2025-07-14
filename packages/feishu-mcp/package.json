@@ -4,9 +4,20 @@
   "description": "MCP server for Feishu/Lark integration with Wiki and Document management",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "feishu-mcp": "dist/cli.js"
+  },
   "scripts": {
     "test": "vitest",
-    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts"
+    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "cli": "tsx src/cli.ts",
+    "start": "node dist/index.js",
+    "cli:built": "node dist/cli.js",
+    "login": "tsx src/cli.ts login",
+    "logout": "tsx src/cli.ts logout",
+    "whoami": "tsx src/cli.ts whoami"
   },
   "keywords": [
     "mcp",
@@ -21,11 +32,15 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "axios": "^1.6.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.0.0",
     "express": "^4.18.0",
+    "inquirer": "^10.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
+    "@types/inquirer": "^9.0.0",
     "@types/node": "^20.0.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.2",
