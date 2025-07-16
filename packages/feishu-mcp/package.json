@@ -5,19 +5,14 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "feishu-mcp": "dist/cli.js"
+    "feishu-mcp": "src/cli.ts"
   },
   "scripts": {
     "test": "vitest",
     "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
-    "build": "tsc",
     "dev": "tsx src/index.ts",
-    "cli": "tsx src/cli.ts",
-    "start": "node dist/index.js",
-    "cli:built": "node dist/cli.js",
-    "login": "tsx src/cli.ts login",
-    "logout": "tsx src/cli.ts logout",
-    "whoami": "tsx src/cli.ts whoami"
+    "cli": "tsx src/cli.ts", 
+    "postinstall": "pnpm link --global"
   },
   "keywords": [
     "mcp",

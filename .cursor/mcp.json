@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "feishu": {
+      "command": "tsx",
+      "args": [
+        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/feishu-mcp/src/index.ts"
+      ],
+      "type": "stdio"
+    }
+  }
+}

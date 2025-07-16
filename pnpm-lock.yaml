@@ -14,15 +14,15 @@ catalogs:
       version: 3.25.42
 
 overrides:
-  '@mcp-servers/cli': link:packages/cli
+  '@mcp-servers/core': link:packages/core
 
 importers:
 
   .:
     dependencies:
-      '@mcp-servers/cli':
-        specifier: link:packages/cli
-        version: link:packages/cli
+      '@mcp-servers/core':
+        specifier: link:packages/core
+        version: link:packages/core
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0

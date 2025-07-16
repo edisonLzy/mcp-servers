@@ -10,10 +10,15 @@ export async function loginCommand(): Promise<void> {
   try {
     const tokenStore = TokenStore.create();
     
-    // Check if we already have credentials
-    await checkExistingCredentials(tokenStore);
+    // Check if we already have valid credentials
+    const hasValidCredentials = await checkExistingCredentials(tokenStore);
     
-    // Always use OAuth login in interactive mode
+    if (hasValidCredentials) {
+      console.log('✅ Found valid credentials! You are already logged in.');
+      return;
+    }
+    
+    // No valid credentials found, proceed with OAuth login
     await handleOAuthLogin(tokenStore);
     
   } catch (error) {
@@ -43,24 +48,28 @@ export async function loginCommand(): Promise<void> {
   }
 }
 
-async function checkExistingCredentials(tokenStore: TokenStore): Promise<void> {
+export async function checkExistingCredentials(tokenStore: TokenStore): Promise<boolean> {
   const appIds = await tokenStore.getAllAppIds();
   
-  if (appIds.length > 0) {
-    console.log('📋 Found existing credentials for:');
-    for (const appId of appIds) {
-      const token = await tokenStore.getToken(appId);
-      if (token) {
-        const isExpired = await tokenStore.isTokenExpired(appId);
-        const status = isExpired ? '⏰ EXPIRED' : '✅ VALID';
-        console.log(`  • App ID: ${appId} [${status}]`);
+  if (appIds.length === 0) {
+    return false;
+  }
+  
+  // Check if any of the stored tokens are valid (not expired)
+  for (const appId of appIds) {
+    const token = await tokenStore.getToken(appId);
+    if (token) {
+      const isExpired = await tokenStore.isTokenExpired(appId);
+      if (!isExpired) {
+        return true; // Found at least one valid token
       }
     }
-    console.log();
   }
+  
+  return false; // No valid tokens found
 }
 
-async function handleOAuthLogin(tokenStore: TokenStore): Promise<void> {
+export async function handleOAuthLogin(tokenStore: TokenStore): Promise<void> {
 
   console.log('📝 Please provide your Feishu App credentials:');
   console.log('   These are used to authenticate your application\n');
