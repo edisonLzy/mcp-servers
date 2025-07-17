@@ -25,7 +25,7 @@ program
 
 // Logout command  
 program
-  .command('logout')
+  .command("logout")
   .description('Clear all stored authentication credentials')
   .action(logoutCommand);
 
