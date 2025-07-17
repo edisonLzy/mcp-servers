@@ -1,10 +1,10 @@
-import inquirer from 'inquirer';
-import { TokenStore } from '../auth/tokenStore.js';
-import { loginCommand, checkExistingCredentials } from './login.js';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import inquirer from 'inquirer';
+import { TokenStore } from '../auth/tokenStore.js';
+import { loginCommand, checkExistingCredentials } from './login.js';
 
 export interface InstallOptions {
   client: string;
@@ -20,11 +20,11 @@ const MCP_CLIENTS = {
       project: path.join(process.cwd(), '.cursor', 'mcp.json')
     },
     getTemplate: (entryPath: string) => ({
-      "mcpServers": {
-        "feishu": {
-          "command": "tsx",
-          "args": [entryPath],
-          "type": "stdio"
+      'mcpServers': {
+        'feishu': {
+          'command': 'tsx',
+          'args': [entryPath],
+          'type': 'stdio'
         }
       }
     })
@@ -36,10 +36,10 @@ const MCP_CLIENTS = {
       project: path.join(process.cwd(), '.gemini', 'settings.json')
     },
     getTemplate: (entryPath: string) => ({
-      "servers": {
-        "feishu": {
-          "command": "tsx",
-          "args": [entryPath]
+      'mcpServers': {
+        'feishu': {
+          'command': 'tsx',
+          'args': [entryPath]
         }
       }
     })
@@ -159,9 +159,9 @@ async function installMCPServer(clientType: MCPClientType, isGlobal: boolean): P
       // Gemini CLI 配置格式
       const template = clientConfig.getTemplate(entryPath);
       if (!config.servers) {
-        config.servers = {};
+        config.mcpServers = {};
       }
-      config.servers.feishu = (template as any).servers.feishu;
+      config.mcpServers.feishu = (template as any).mcpServers.feishu;
     }
 
     // 写入配置文件
@@ -200,5 +200,3 @@ async function installMCPServer(clientType: MCPClientType, isGlobal: boolean): P
     throw new Error(`配置文件操作失败: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
-
- 
