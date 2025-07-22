@@ -1,4 +1,3 @@
-import { WEAPONS_API_BASE_URL } from './constant.js';
 import { ConfigStore } from './auth/configStore.js';
 import type {
   WeaponsConfig,
@@ -12,13 +11,13 @@ import type {
 export class WeaponsClient {
   private token: string = '';
   private uid: string = '';
-  private baseURL: string;
+  private baseURL: string = '';
   private configStore: ConfigStore;
 
   constructor(config?: Partial<WeaponsConfig>) {
     this.configStore = ConfigStore.create();
     
-    this.baseURL = config?.baseURL || WEAPONS_API_BASE_URL;
+    this.baseURL = config?.baseURL || '';
   }
 
   private async initializeFromStoredConfig(): Promise<void> {
@@ -27,7 +26,7 @@ export class WeaponsClient {
       if (storedConfig) {
         this.token = this.token || storedConfig.token;
         this.uid = this.uid || storedConfig.uid;
-        this.baseURL = this.baseURL || storedConfig.baseURL || WEAPONS_API_BASE_URL;
+        this.baseURL = this.baseURL || storedConfig.baseURL;
       }
     } catch (error) {
       console.warn('Failed to load stored config:', error);
@@ -36,13 +35,19 @@ export class WeaponsClient {
 
   async ensureInitialized(): Promise<void> {
     // Always try to load from stored config if we don't have credentials
-    if (!this.token || !this.uid) {
+    if (!this.token || !this.uid || !this.baseURL) {
       await this.initializeFromStoredConfig();
     }
     
     if (!this.token || !this.uid) {
       throw new Error(
         'Missing required credentials (token, uid). Please run "weapons-mcp install" to configure your credentials.'
+      );
+    }
+    
+    if (!this.baseURL) {
+      throw new Error(
+        'Missing required base URL. Please run "weapons-mcp install" to configure your base URL.'
       );
     }
   }

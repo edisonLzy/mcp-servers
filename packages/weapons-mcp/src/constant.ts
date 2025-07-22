@@ -1,1 +1,0 @@
-export const WEAPONS_API_BASE_URL = 'https://weapons.xx.com'; 

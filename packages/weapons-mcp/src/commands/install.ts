@@ -4,7 +4,6 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import inquirer from 'inquirer';
 import { ConfigStore } from '../auth/configStore.js';
-import { WEAPONS_API_BASE_URL } from '../constant.js';
 
 export interface InstallOptions {
   client: string;
@@ -206,10 +205,26 @@ async function checkExistingConfig(configStore: ConfigStore): Promise<boolean> {
 }
 
 async function handleConfigSetup(configStore: ConfigStore): Promise<void> {
-  console.log('📝 请提供您的 Weapons 访问凭据:');
+  console.log('📝 请提供您的 Weapons 访问信息:');
   console.log('   这些信息来自浏览器登录 Weapons 平台后的 Cookie\n');
   
   const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'baseURL',
+      message: 'Weapons 平台 Base URL (例如: https://weapons.xx.com):',
+      required: true,
+      validate: (input: string) => {
+        const trimmed = input.trim();
+        if (trimmed.length === 0) return 'Base URL 是必需的';
+        try {
+          new URL(trimmed);
+          return true;
+        } catch {
+          return '请输入有效的 URL 格式';
+        }
+      }
+    },
     {
       type: 'input',
       name: 'token',
@@ -232,17 +247,17 @@ async function handleConfigSetup(configStore: ConfigStore): Promise<void> {
     },
   ]);
 
-  const { token, uid } = answers;
+  const { baseURL, token, uid } = answers;
 
   console.log('\n💾 保存配置信息...');
+  console.log(`   Base URL: ${baseURL}`);
   console.log(`   Token: ${token.substring(0, 8)}...`);
   console.log(`   UID: ${uid}`);
-  console.log(`   Base URL: ${WEAPONS_API_BASE_URL}`);
 
   await configStore.storeConfig({
+    baseURL,
     token,
     uid,
-    baseURL: WEAPONS_API_BASE_URL,
     createdAt: Date.now()
   });
   
