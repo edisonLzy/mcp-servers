@@ -9,7 +9,7 @@ const getEndpointsSchema = z.object({
       `The category ID of the weapons uri which extracted from the given url
       
        Example:
-       input: https://weapons.ke.com/project/21048/interface/api/cat_316848
+       input: https://weapons.xx.com/project/21048/interface/api/cat_316848
        output: 316848
       `
     ),

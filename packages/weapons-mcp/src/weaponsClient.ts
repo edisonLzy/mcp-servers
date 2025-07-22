@@ -10,23 +10,15 @@ import type {
 } from './types/weapons.js';
 
 export class WeaponsClient {
-  private token: string;
-  private uid: string;
+  private token: string = '';
+  private uid: string = '';
   private baseURL: string;
   private configStore: ConfigStore;
 
   constructor(config?: Partial<WeaponsConfig>) {
     this.configStore = ConfigStore.create();
     
-    // Priority: 1. Explicit config 2. Environment variables 3. Stored config
-    this.token = config?.token || process.env._yapi_token || '';
-    this.uid = config?.uid || process.env._yapi_uid || '';
     this.baseURL = config?.baseURL || WEAPONS_API_BASE_URL;
-
-    // If no explicit config provided, try to load from stored config
-    if (!this.token || !this.uid) {
-      this.initializeFromStoredConfig();
-    }
   }
 
   private async initializeFromStoredConfig(): Promise<void> {
@@ -43,6 +35,7 @@ export class WeaponsClient {
   }
 
   async ensureInitialized(): Promise<void> {
+    // Always try to load from stored config if we don't have credentials
     if (!this.token || !this.uid) {
       await this.initializeFromStoredConfig();
     }
@@ -116,7 +109,7 @@ export class WeaponsClient {
       
       const responseData = await response.json() as EndpointListResponse;
       
-      if (responseData.errno !== '0') {
+      if (responseData.errcode !== 0) {
         throw new Error(`API Error: ${responseData.errmsg}`);
       }
       
@@ -136,7 +129,8 @@ export class WeaponsClient {
    * @param id 接口ID
    * @returns 接口详细信息
    */
-  private async getEndpointDetail(id: string): Promise<Endpoint> {
+  async getEndpointDetail(id: string): Promise<Endpoint> {
+    await this.ensureInitialized();
     const url = `${this.baseURL}/api/interface/get?id=${id}`;
     
     try {
@@ -152,7 +146,7 @@ export class WeaponsClient {
       
       const responseData = await response.json() as EndpointDetailResponse;
       
-      if (responseData.errno !== '0') {
+      if (responseData.errcode !== 0) {
         throw new Error(`API Error: ${responseData.errmsg}`);
       }
       

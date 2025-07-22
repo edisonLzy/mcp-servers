@@ -2,7 +2,7 @@
 
 // 通用接口响应结构
 export interface ApiResponse<T> {
-  errno: string;
+  errcode: number;
   errmsg: string;
   data: T;
 }

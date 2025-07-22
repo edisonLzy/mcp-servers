@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import dotenv from 'dotenv';
-import { installCommand } from './commands/install';
+import { installCommand } from './commands/install.js';
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +18,8 @@ program
 program
   .command('install')
   .description('配置 Weapons 访问凭据并安装 MCP Server')
+  .option('-c, --client <client>', '目标 MCP 客户端 (cursor, gemini-cli)', 'cursor')
+  .option('-g, --global', '全局安装 (默认为项目级别)', false)
   .action(installCommand);
 
 // Parse command line arguments

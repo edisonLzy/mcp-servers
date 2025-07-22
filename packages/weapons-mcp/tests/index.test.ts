@@ -16,22 +16,57 @@ describe('WeaponsClient', () => {
     expect(weaponsClient).toBeDefined();
   });
 
-  it('should throw error when missing credentials', () => {
+  it('should handle missing credentials gracefully', async () => {
+    // Clear both env vars and create new client
+    const originalToken = process.env._yapi_token;
+    const originalUid = process.env._yapi_uid;
+    
     delete process.env._yapi_token;
     delete process.env._yapi_uid;
     
-    expect(() => new WeaponsClient()).toThrow(
-      'Missing required environment variables (_yapi_token, _yapi_uid). Please check your .env file.'
-    );
+    const client = new WeaponsClient();
+    
+    try {
+      // Should throw when trying to get endpoints
+      await expect(client.getEndpoints('123')).rejects.toThrow(
+        'Missing required credentials'
+      );
+    } finally {
+      // Restore env vars
+      if (originalToken) process.env._yapi_token = originalToken;
+      if (originalUid) process.env._yapi_uid = originalUid;
+    }
   });
 
   it('should accept custom config', () => {
     const customClient = new WeaponsClient({
       token: 'custom_token',
       uid: 'custom_uid',
-      baseURL: 'https://custom.weapons.com'
+      baseURL: 'https://custom.api.com'
     });
     
     expect(customClient).toBeDefined();
+  });
+
+  it('should handle missing credentials for getEndpointDetail', async () => {
+    // Clear both env vars and create new client
+    const originalToken = process.env._yapi_token;
+    const originalUid = process.env._yapi_uid;
+    
+    delete process.env._yapi_token;
+    delete process.env._yapi_uid;
+    
+    const client = new WeaponsClient();
+    
+    try {
+      // Should throw when trying to get endpoint detail
+      await expect(client.getEndpointDetail('123')).rejects.toThrow(
+        'Missing required credentials'
+      );
+    } finally {
+      // Restore env vars
+      if (originalToken) process.env._yapi_token = originalToken;
+      if (originalUid) process.env._yapi_uid = originalUid;
+    }
   });
 }); 
