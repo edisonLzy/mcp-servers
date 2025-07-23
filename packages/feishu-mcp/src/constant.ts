@@ -1,0 +1,1 @@
+export const FEISHU_API_BASE_URL = 'https://open.feishu.cn';

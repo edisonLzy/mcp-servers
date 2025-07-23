@@ -3,9 +3,6 @@
   "version": "0.0.1",
   "description": "Core for MCP Servers",
   "type": "module",
-  "bin": {
-    "clirk": "./src/cli/entry.ts"
-  },
   "scripts": {
     "test": "vitest run"
   },
