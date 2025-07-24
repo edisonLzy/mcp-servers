@@ -2,7 +2,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { registerCreateWorkflowTool } from './tools/createWorkflow.js';
+import { registerCreateWorkflowTool } from './tools/createMCPServer.js';
 
 async function main() {
   // Create an MCP server

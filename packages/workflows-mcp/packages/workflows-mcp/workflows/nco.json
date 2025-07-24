@@ -1,0 +1,22 @@
+{
+  "id": "nco",
+  "name": "nco",
+  "description": "cc",
+  "version": "1.0.0",
+  "category": "general",
+  "tags": [],
+  "author": "Workflows MCP",
+  "created_at": "2025-07-24T13:09:18.253Z",
+  "updated_at": "2025-07-24T13:09:18.253Z",
+  "status": "active",
+  "inputs": [],
+  "steps": [],
+  "outputs": [],
+  "metadata": {
+    "execution_time_estimate": "Unknown",
+    "complexity": "medium",
+    "prerequisites": [],
+    "related_workflows": [],
+    "documentation_url": ""
+  }
+}
