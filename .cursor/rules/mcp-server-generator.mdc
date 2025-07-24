@@ -71,7 +71,6 @@ packages/{server-name}/
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "commander": "^12.0.0",
-    "dotenv": "^16.5.0",
     "inquirer": "^10.0.0",
     "zod": "catalog:"
   },
@@ -94,12 +93,9 @@ packages/{server-name}/
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import dotenv from 'dotenv';
 import { {ServiceName}Client } from './{serviceName}Client.js';
 import { registerExampleTool } from './tools/exampleTool.js';
 import { registerAnotherTool } from './tools/anotherTool.js';
-
-dotenv.config();
 
 async function main() {
   // Create an MCP server
@@ -183,16 +179,12 @@ export function registerExampleTool(server: McpServer, client: {ServiceName}Clie
 }
 ```
 
-### src/cli.ts 模板（可选）
+### src/cli.ts 模板（必需）
 ```typescript
 #!/usr/bin/env -S pnpm tsx
 
 import { Command } from 'commander';
-import dotenv from 'dotenv';
 import { installCommand } from './commands/install.js';
-
-// Load environment variables
-dotenv.config();
 
 const program = new Command();
 
@@ -334,7 +326,7 @@ export interface {ServiceName}Error {
 // 其他业务相关类型定义...
 ```
 
-### src/auth/types.ts 模板（可选）
+### src/auth/types.ts 模板（认证时必需）
 ```typescript
 export interface {ServiceName}ConfigInfo {
   token: string;
@@ -345,7 +337,7 @@ export interface {ServiceName}ConfigInfo {
 export type StoredConfigData = {ServiceName}ConfigInfo;
 ```
 
-### src/auth/configStore.ts 模板（可选）
+### src/auth/configStore.ts 模板（认证时必需）
 ```typescript
 import fs from 'fs';
 import path from 'path';
@@ -466,8 +458,9 @@ pnpm inspector
 6. **架构模式**:
    - 每个 MCP server 包含独立的客户端类
    - 支持配置存储和认证机制
-   - 提供 CLI 工具用于安装和配置
+   - **必须提供 CLI 工具**：包含 install 命令用于安装和配置
    - 工具函数接收客户端实例作为参数
+   - **重点关注项目结构**：确保目录结构完整，**不实现任何工具的具体逻辑**
 7. **测试支持**: 每个 MCP server 都包含 vitest 测试配置
 8. **开发工具**: 包含 inspector 脚本用于调试和 CLI 脚本用于配置
 
@@ -478,6 +471,7 @@ pnpm inspector
 1. **创建项目结构**:
    - 在 `packages/` 目录下创建新的服务器目录
    - 根据模板创建所有必要文件和目录结构
+   - **仅创建文件结构，不实现任何工具的具体逻辑**
 
 2. **替换占位符**:
    - `{server-name}`: 服务器名称 (kebab-case)
@@ -487,15 +481,17 @@ pnpm inspector
    - `{serviceName}`: 服务名称 (camelCase，用于文件名)
    - `{service-name}`: 服务名称 (kebab-case)
 
-3. **可选组件**:
-   - 如果需要 CLI 功能，创建 `cli.ts`、`commands/` 目录
+3. **必需组件**:
+   - **必须包含 CLI 功能**：创建 `cli.ts`、`commands/` 目录
+   - **必须包含 install 命令**：每个 MCP server 都必须提供 install 命令用于配置和安装
    - 如果需要认证，创建 `auth/` 目录和相关文件
-   - 根据实际需求调整客户端和工具实现
+   - 根据实际需求调整客户端和工具结构（仅关注项目结构，**不实现任何工具逻辑**）
 
 4. **安装和测试**:
    - 提示用户运行 `pnpm install` 安装依赖
    - 提示用户可以使用 `pnpm inspector` 测试服务器
    - 如果包含 CLI，提示用户可以使用 `pnpm cli` 进行配置
+   - **注意：此阶段不实现工具的具体功能，仅确保结构完整**
 
 5. **文档更新**:
    - 更新 README.md 包含具体的工具说明
