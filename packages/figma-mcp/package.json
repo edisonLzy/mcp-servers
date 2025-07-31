@@ -27,6 +27,7 @@
   "author": "MCP Servers Team",
   "license": "MIT",
   "dependencies": {
+    "@mcp-servers/core": "workspace:*",
     "@modelcontextprotocol/sdk": "catalog:",
     "axios": "^1.6.0",
     "commander": "^12.0.0",

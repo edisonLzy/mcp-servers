@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import inquirer from 'inquirer';
+import { createInstallCommand } from '@mcp-servers/core';
 import { FigmaClient } from './figmaClient.js';
 import { ConfigStore } from './auth/configStore.js';
 import type { FigmaConfig } from './auth/types.js';
@@ -51,10 +52,10 @@ program
       // Test the token
       try {
         const user = await client.getCurrentUser();
-        console.log(`\n✅ Authentication successful!`);
+        console.log('\n✅ Authentication successful!');
         console.log(`Hello, ${user.handle} (${user.email})`);
       } catch (error) {
-        console.log(`\n❌ Authentication failed. Please check your token.`);
+        console.log('\n❌ Authentication failed. Please check your token.');
         await client.clearConfig();
         process.exit(1);
       }
@@ -92,62 +93,117 @@ program
     }
   });
 
-program
-  .command('install')
-  .description('Install Figma MCP server to MCP client')
-  .option('--client <client>', 'MCP client to install to (cursor, claude-desktop)', 'cursor')
-  .option('--global', 'Install globally (system-wide)', false)
-  .action(async (options) => {
+// Create custom PAT validator for Figma
+class FigmaPATValidator {
+  private configStore: ConfigStore;
+  private client: FigmaClient;
+
+  constructor(configStore: ConfigStore, client: FigmaClient) {
+    this.configStore = configStore;
+    this.client = client;
+  }
+
+  async validate(): Promise<boolean> {
     try {
-      if (!client.isConfigured()) {
-        console.log('❌ Figma not configured. Please run "figma-mcp login" first.');
-        process.exit(1);
-      }
+      return this.client.isConfigured();
+    } catch {
+      return false;
+    }
+  }
 
-      const configStore = ConfigStore.create();
-      const config = await configStore.getConfig();
-      
-      if (!config) {
-        console.log('❌ No configuration found. Please run "figma-mcp login" first.');
-        process.exit(1);
-      }
+  async getStatusMessage(): Promise<string> {
+    const isValid = await this.validate();
+    return isValid ? '✅ 已检测到有效的 Figma 配置' : '❌ 检测到您尚未配置 Figma 访问凭据';
+  }
 
-      // For now, just show installation instructions
-      console.log(`\n📋 Installation instructions for ${options.client}:`);
-      
-      if (options.client === 'cursor') {
-        console.log('\nAdd the following to your Cursor MCP configuration:');
-        console.log(JSON.stringify({
-          "mcpServers": {
-            "figma": {
-              "command": "tsx",
-              "args": [`${process.cwd()}/src/index.ts`],
-              "env": {
-                "FIGMA_PAT": config.personalAccessToken
-              }
-            }
-          }
-        }, null, 2));
-      } else if (options.client === 'claude-desktop') {
-        console.log('\nAdd the following to your Claude Desktop configuration:');
-        console.log(JSON.stringify({
-          "mcpServers": {
-            "figma": {
-              "command": "tsx",
-              "args": [`${process.cwd()}/src/index.ts`],
-              "env": {
-                "FIGMA_PAT": config.personalAccessToken
-              }
-            }
-          }
-        }, null, 2));
+  async promptConfiguration(): Promise<void> {
+    console.log('❌ 检测到您尚未配置 Figma 访问凭据');
+    console.log('🔑 需要先完成配置才能继续安装\n');
+    
+    const { shouldConfigure } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldConfigure',
+        message: '是否现在进行配置？',
+        default: true
       }
-      
-      console.log('\nMake sure tsx is installed: npm install -g tsx');
-    } catch (error) {
-      console.error('Error during install:', error);
+    ]);
+
+    if (!shouldConfigure) {
+      console.log('⚠️  安装已取消，请先运行配置命令：');
+      console.log('   figma-mcp login');
       process.exit(1);
     }
-  });
 
-program.parse();
+    console.log('🔄 开始配置流程...\n');
+    await this.handleConfigSetup();
+    console.log('\n✅ 配置完成，继续安装流程...\n');
+  }
+
+  async getAuthConfig(): Promise<Record<string, any>> {
+    const config = await this.configStore.getConfig();
+    if (!config) {
+      return {};
+    }
+    return {
+      FIGMA_PAT: config.personalAccessToken
+    };
+  }
+
+  private async handleConfigSetup(): Promise<void> {
+    console.log('Welcome to Figma MCP Server setup!');
+    console.log('To get your Figma Personal Access Token:');
+    console.log('1. Go to https://www.figma.com/developers/api#access-tokens');
+    console.log('2. Click "Generate new token"');
+    console.log('3. Copy your personal access token\n');
+
+    const { token } = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'token',
+        message: 'Enter your Figma Personal Access Token:',
+        validate: (input: string) => {
+          if (!input.trim()) {
+            return 'Token is required';
+          }
+          if (!input.startsWith('figd_')) {
+            return 'Figma tokens should start with "figd_"';
+          }
+          return true;
+        },
+      },
+    ]);
+
+    const config: FigmaConfig = {
+      personalAccessToken: token.trim(),
+    };
+
+    await this.client.setConfig(config);
+    
+    // Test the token
+    try {
+      const user = await this.client.getCurrentUser();
+      console.log('\n✅ Authentication successful!');
+      console.log(`Hello, ${user.handle} (${user.email})`);
+    } catch (error) {
+      console.log('\n❌ Authentication failed. Please check your token.');
+      await this.client.clearConfig();
+      process.exit(1);
+    }
+  }
+}
+
+// Create install command synchronously
+const configStore = ConfigStore.create();
+const authValidator = new FigmaPATValidator(configStore, client);
+
+// Create install command and then parse
+createInstallCommand({
+  serverName: 'figma',
+  authValidator: authValidator as any,
+  installMode: 'instructions',
+  description: 'Install Figma MCP server to MCP client'
+}).then(installCommand => {
+  program.addCommand(installCommand);
+  program.parse();
+});

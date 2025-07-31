@@ -1,2 +1,5 @@
-// TODO:
-// 1. encapsulate the MCP server
+// Core utilities for MCP servers
+
+export * from './cli/index.js';
+
+export * from './install/index.js';

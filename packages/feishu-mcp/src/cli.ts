@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { loginCommand } from './commands/login.js';
 import { logoutCommand } from './commands/logout.js';
 import { whoamiCommand } from './commands/whoami.js';
-import { installCommand, InstallOptions } from './commands/install.js';
+import { installCommand } from './commands/install.js';
 
 // Load environment variables
 dotenv.config();
