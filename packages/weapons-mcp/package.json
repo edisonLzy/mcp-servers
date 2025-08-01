@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
-    "commander": "^12.0.0",
+    "commander": "catalog:",
     "dotenv": "^16.5.0",
     "inquirer": "^10.0.0",
     "zod": "catalog:"

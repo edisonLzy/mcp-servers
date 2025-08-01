@@ -4,12 +4,16 @@
   "description": "Confluence MCP Server",
   "type": "module",
   "main": "src/index.ts",
+  "bin": {
+    "confluence-mcp": "src/cli.ts"
+  },
   "files": [
     "src"
   ],
   "scripts": {
     "test": "vitest",
-    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts"
+    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
+    "postinstall": "pnpm link --global"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
@@ -22,6 +26,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "axios": "^1.9.0",
+    "commander": "catalog:",
     "dotenv": "^16.5.0",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
