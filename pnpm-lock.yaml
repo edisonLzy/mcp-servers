@@ -84,6 +84,9 @@ importers:
 
   packages/confluence-mcp:
     dependencies:
+      '@mcp-servers/core':
+        specifier: link:../core
+        version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
         version: 1.12.1
@@ -155,6 +158,9 @@ importers:
 
   packages/feishu-mcp:
     dependencies:
+      '@mcp-servers/core':
+        specifier: link:../core
+        version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
         version: 1.12.1

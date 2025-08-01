@@ -21,14 +21,24 @@ const installCommand = createInstallCommand({
     console.log(`Client: ${options.client}, Global: ${options.global}`);
     
     // Check for required environment variables
-    const requiredEnvVars = ['CONFLUENCE_URL', 'CONFLUENCE_USERNAME', 'CONFLUENCE_API_TOKEN'];
+    const requiredEnvVars = ['CONFLUENCE_BASE_URL', 'CONFLUENCE_USERNAME', 'CONFLUENCE_PASSWORD'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
-      console.error(`❌ Missing required environment variables: ${missingVars.join(', ')}`);
-      console.error('Please set these environment variables before installing.');
+      console.log('❌ 检测到缺少必需的环境变量');
+      console.log(`   缺少: ${missingVars.join(', ')}`);
+      console.log('\n📝 请设置以下环境变量:');
+      console.log('   CONFLUENCE_BASE_URL - Confluence 服务器地址');
+      console.log('   CONFLUENCE_USERNAME - 用户名');
+      console.log('   CONFLUENCE_PASSWORD - 密码或 API Token');
+      console.log('\n💡 建议在 .env 文件中设置这些变量');
       return false;
     }
+    
+    console.log('✅ 环境变量配置检查通过');
+    console.log(`   Base URL: ${process.env.CONFLUENCE_BASE_URL}`);
+    console.log(`   Username: ${process.env.CONFLUENCE_USERNAME}`);
+    console.log(`   Password: ${process.env.CONFLUENCE_PASSWORD ? '***' : '未设置'}`);
     
     return true;
   }

@@ -13,17 +13,23 @@
   "scripts": {
     "test": "vitest",
     "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
+    "cli": "tsx src/cli.ts",
+    "dev": "tsx src/index.ts",
     "postinstall": "pnpm link --global"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.4"
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.2"
   },
   "keywords": [
     "mcp",
     "typescript"
   ],
   "dependencies": {
+    "@mcp-servers/core": "workspace:*",
     "@modelcontextprotocol/sdk": "catalog:",
     "axios": "^1.9.0",
     "commander": "catalog:",
