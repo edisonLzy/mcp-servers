@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # MCP Server 快速生成规则
 
-这个规则用于快速创建标准的 MCP (Model Context Protocol) Server 项目结构。
+这个规则用于快速创建标准的 MCP (Model Context Protocol) Server 项目结构，支持 tools 和 prompts 功能。
 
 ## 使用方法
 
@@ -19,6 +19,8 @@ packages/{server-name}/
 │   ├── index.ts                 # 主入口文件
 │   ├── tools/                   # 工具函数目录
 │   │   └── example.ts           # 示例工具文件
+│   ├── prompts/                 # 提示词目录
+│   │   └── example.ts           # 示例提示词文件
 │   └── client.ts                # 客户端文件（可选）
 ├── tests/                       # 测试目录
 │   └── index.test.ts            # 测试文件
@@ -62,6 +64,7 @@ packages/{server-name}/
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registerExampleTool } from './tools/example.js';
+import { registerExamplePrompt } from './prompts/example.js';
 
 async function main() {
   // Create an MCP server
@@ -73,12 +76,16 @@ async function main() {
     {
       capabilities: {
         tools: {},
+        prompts: {},
       },
     },
   );
 
   // Add tools
   registerExampleTool(server);
+
+  // Add prompts
+  registerExamplePrompt(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
@@ -91,26 +98,86 @@ main().catch(console.error);
 ### src/tools/example.ts 模板
 ```typescript
 import { z } from 'zod';
-import { ConfluenceClient } from '../confluenceClient';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 const exampleToolSchema = z.object({
   // 定义工具参数结构
+  parameter: z.string().describe('示例参数'),
 });
 
 export function registerExampleTool(server: McpServer) {
   server.tool(
-    '{tool name}',
+    '{tool-name}',
     '{tool description}',
     exampleToolSchema.shape,
     async (request) => {
       try {
         // 实现工具逻辑
+        const { parameter } = request.params;
+        
         return {
           content: [
             {
               type: 'text',
-              text: 'Tool execution result',
+              text: `Tool execution result with parameter: ${parameter}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+}
+```
+
+### src/prompts/example.ts 模板
+```typescript
+import { z } from 'zod';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+const examplePromptSchema = z.object({
+  // 定义提示词参数结构
+  context: z.string().describe('上下文信息'),
+  style: z.enum(['formal', 'casual', 'technical']).optional().describe('写作风格'),
+});
+
+export function registerExamplePrompt(server: McpServer) {
+  server.prompt(
+    '{prompt-name}',
+    '{prompt description}',
+    examplePromptSchema.shape,
+    async (request) => {
+      try {
+        const { context, style = 'formal' } = request.params;
+        
+        // 根据参数生成提示词
+        let promptText = `基于以下上下文信息：${context}\n\n`;
+        
+        switch (style) {
+          case 'casual':
+            promptText += '请用轻松友好的语气回答。';
+            break;
+          case 'technical':
+            promptText += '请用专业的技术术语回答。';
+            break;
+          default:
+            promptText += '请用正式的语气回答。';
+        }
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: promptText,
             },
           ],
         };
@@ -165,7 +232,11 @@ pnpm inspector
 
 ## Tools
 
-- `example-tool`: Example tool description
+- `{tool-name}`: {tool description}
+
+## Prompts
+
+- `{prompt-name}`: {prompt description}
 ```
 
 ## 规则要点
@@ -176,12 +247,18 @@ pnpm inspector
 4. **标准化命名**: 
    - 包名使用 kebab-case: `example-mcp`
    - 工具名使用 kebab-case: `example-tool`
-   - 文件名使用 camelCase: `exampleTool.ts`
+   - 提示词名使用 kebab-case: `example-prompt`
+   - 文件名使用 camelCase: `exampleTool.ts`, `examplePrompt.ts`
 5. **依赖管理**: 
    - 使用 catalog 模式管理通用依赖版本
    - MCP SDK 版本统一管理
 6. **测试支持**: 每个 MCP server 都包含 vitest 测试配置
 7. **开发工具**: 包含 inspector 脚本用于调试
+8. **功能支持**: 
+   - 支持 tools 功能：提供可调用的工具函数
+   - 支持 prompts 功能：提供动态生成的提示词模板
+9. **错误处理**: 所有工具和提示词都包含完善的错误处理机制
+10. **参数验证**: 使用 zod 进行参数验证和类型安全
 
 ## 生成步骤
 
@@ -190,7 +267,16 @@ pnpm inspector
 1. 在 `packages/` 目录下创建新的服务器目录
 2. 根据模板创建所有必要文件
 3. 将 `{server-name}` 等占位符替换为实际值
-4. 提示用户运行 `pnpm install` 安装依赖
-5. 提示用户可以使用 `pnpm inspector` 测试服务器
+4. 根据需求选择性地实现 tools 和 prompts 功能
+5. 提示用户运行 `pnpm install` 安装依赖
+6. 提示用户可以使用 `pnpm inspector` 测试服务器
 
-这个规则确保所有 MCP server 都遵循统一的结构和最佳实践。 
+## 功能选择
+
+根据 MCP server 的具体需求，可以选择实现以下功能：
+
+- **仅 Tools**: 只实现工具功能，用于提供可调用的 API
+- **仅 Prompts**: 只实现提示词功能，用于提供动态提示词模板
+- **Tools + Prompts**: 同时实现工具和提示词功能，提供完整的 MCP 服务
+
+这个规则确保所有 MCP server 都遵循统一的结构和最佳实践，同时支持现代 MCP 协议的所有核心功能。 
