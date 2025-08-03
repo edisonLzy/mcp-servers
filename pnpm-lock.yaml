@@ -124,6 +124,15 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.17.25
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
 
   packages/core:
     dependencies:
@@ -229,6 +238,37 @@ importers:
       '@types/inquirer':
         specifier: ^9.0.0
         version: 9.0.8
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.17.25
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@20.17.25)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.7.0)
+
+  packages/prompts-mcp:
+    dependencies:
+      '@mcp-servers/core':
+        specifier: link:../core
+        version: link:../core
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.12.1
+      commander:
+        specifier: 'catalog:'
+        version: 14.0.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.42
+    devDependencies:
       '@types/node':
         specifier: ^20.0.0
         version: 20.17.25

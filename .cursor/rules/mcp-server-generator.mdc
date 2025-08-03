@@ -6,9 +6,11 @@ alwaysApply: false
 
 这个规则用于快速创建标准的 MCP (Model Context Protocol) Server 项目结构，支持 tools 和 prompts 功能，以及 CLI 安装功能。
 
+切记不要生成任何功能,切记不要生成任何功能,切记不要生成任何功能
+
 ## 使用方法
 
-当用户请求创建新的 MCP server 时，按照以下目录结构和文件模板进行创建,切记不要生成任何功能.
+当用户请求创建新的 MCP server 时，按照以下目录结构和文件模板进行创建.
 
 ## 项目结构
 
