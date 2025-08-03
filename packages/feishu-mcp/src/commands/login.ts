@@ -124,7 +124,7 @@ export async function handleOAuthLogin(tokenStore: TokenStore): Promise<void> {
     }
 
     console.log('\n🔐 Opening browser for authorization...');
-    console.log(`Please open the following URL in your browser:`);
+    console.log('Please open the following URL in your browser:');
     console.log(`\n${authResult.authorizeUrl}\n`);
     console.log('⏳ Waiting for authorization (timeout: 5 minutes)...');
     

@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { TokenStore } from './auth/tokenStore.js';
-import type { TokenInfo } from './auth/types.js';
+import { FEISHU_API_BASE_URL } from './constant.js';
+import type { TokenStore } from './auth/tokenStore.js';
 import type { 
-  FeishuConfig, 
   FeishuResponse, 
   FeishuError,
   ListSpacesResponse,
@@ -13,7 +12,6 @@ import type {
   UserInfo
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
-import { FEISHU_API_BASE_URL } from './constant.js';
 
 export class FeishuClient {
   private httpClient: AxiosInstance;

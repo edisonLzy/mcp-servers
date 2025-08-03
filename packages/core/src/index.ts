@@ -1,2 +1,2 @@
-// TODO:
-// 1. encapsulate the MCP server
+// Core utilities for MCP servers
+export { createInstallCommand } from './commands/install.js';
