@@ -1,0 +1,385 @@
+---
+alwaysApply: false
+---
+
+# MCP Server 快速生成规则
+
+这个规则用于快速创建标准的 MCP (Model Context Protocol) Server 项目结构，支持 tools 和 prompts 功能，以及 CLI 安装功能。
+
+## 使用方法
+
+当用户请求创建新的 MCP server 时，按照以下目录结构和文件模板进行创建,切记不要生成任何功能.
+
+## 项目结构
+
+```
+packages/{server-name}/
+├── src/
+│   ├── index.ts                 # 主入口文件
+│   ├── cli.ts                   # CLI 命令行工具
+│   ├── tools/                   # 工具函数目录
+│   │   └── example.ts           # 示例工具文件
+│   ├── prompts/                 # 提示词目录
+│   │   └── example.ts           # 示例提示词文件
+│   └── client.ts                # 客户端文件（可选）
+├── tests/                       # 测试目录
+│   └── index.test.ts            # 测试文件
+├── package.json                 # 包配置文件
+├── tsconfig.json               # TypeScript 配置
+├── vitest.config.ts            # 测试配置
+└── README.md                   # 文档说明
+```
+
+## 文件模板
+
+### package.json 模板
+```json
+{
+  "name": "@mcp-servers/{server-name}",
+  "version": "0.1.0",
+  "description": "{Server Description}",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "{server-name}-mcp": "src/cli.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev": "tsx src/index.ts",
+    "cli": "tsx src/cli.ts",
+    "postinstall": "pnpm link --global"
+  },
+  "keywords": [
+    "mcp",
+    "typescript"
+  ],
+  "author": "MCP Servers Team",
+  "license": "MIT",
+  "dependencies": {
+    "@mcp-servers/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "commander": "catalog:",
+    "dotenv": "^16.5.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+```
+
+### src/index.ts 模板
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { registerExampleTool } from './tools/example.js';
+import { registerExamplePrompt } from './prompts/example.js';
+
+async function main() {
+  // Create an MCP server
+  const server = new McpServer(
+    {
+      name: '{Server Name}',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+        prompts: {},
+      },
+    },
+  );
+
+  // Add tools
+  registerExampleTool(server);
+
+  // Add prompts
+  registerExamplePrompt(server);
+
+  // Start receiving messages on stdin and sending messages on stdout
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+```
+
+### src/cli.ts 模板
+```typescript
+#!/usr/bin/env -S pnpm tsx
+
+import { Command } from 'commander';
+import { createInstallCommand } from '@mcp-servers/core';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const program = new Command();
+
+program
+  .name('{server-name}-mcp')
+  .description('CLI for {Server Name} MCP Server')
+  .version('0.1.0');
+
+const entryPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'index.ts');
+const installCommand = createInstallCommand({
+  name: '{server-name}-mcp',
+  entryPath: entryPath,
+  beforeInstall: async (options) => {
+    console.log('🔧 Installing {Server Name} MCP Server...');
+    console.log(`Client: ${options.client}, Global: ${options.global}`);
+    
+    // 可以在这里添加安装前的验证逻辑
+    console.log('✅ 安装前检查完成');
+    return true;
+  },
+});
+program.addCommand(installCommand);
+
+program.parse();
+```
+
+### src/tools/example.ts 模板
+```typescript
+import { z } from 'zod';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+const exampleToolSchema = z.object({
+  // 定义工具参数结构
+  parameter: z.string().describe('示例参数'),
+});
+
+export function registerExampleTool(server: McpServer) {
+  server.tool(
+    '{tool-name}',
+    '{tool description}',
+    exampleToolSchema.shape,
+    async (request) => {
+      try {
+        // 实现工具逻辑
+        const { parameter } = request.params;
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Tool execution result with parameter: ${parameter}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+}
+```
+
+### src/prompts/example.ts 模板
+```typescript
+import { z } from 'zod';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+const examplePromptSchema = z.object({
+  // 定义提示词参数结构
+  context: z.string().describe('上下文信息'),
+  style: z.enum(['formal', 'casual', 'technical']).optional().describe('写作风格'),
+});
+
+export function registerExamplePrompt(server: McpServer) {
+  server.prompt(
+    '{prompt-name}',
+    '{prompt description}',
+    examplePromptSchema.shape,
+    async (request) => {
+      try {
+        const { context, style = 'formal' } = request.params;
+        
+        // 根据参数生成提示词
+        let promptText = `基于以下上下文信息：${context}\n\n`;
+        
+        switch (style) {
+          case 'casual':
+            promptText += '请用轻松友好的语气回答。';
+            break;
+          case 'technical':
+            promptText += '请用专业的技术术语回答。';
+            break;
+          default:
+            promptText += '请用正式的语气回答。';
+        }
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: promptText,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+}
+```
+
+### tsconfig.json 模板
+```json
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*", "tests/**/*"]
+}
+```
+
+### vitest.config.ts 模板
+```typescript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+  },
+});
+```
+
+### README.md 模板
+```markdown
+# {Server Name} MCP Server
+
+{Server Description}
+
+## Installation
+
+Install the MCP server to your MCP client:
+
+```bash
+# Install globally
+{server-name}-mcp install -c cursor -g
+
+# Install for current project
+{server-name}-mcp install -c cursor
+```
+
+## Usage
+
+Use the MCP inspector to test this server:
+
+```bash
+pnpm inspector
+```
+
+## CLI Commands
+
+- `install`: Install MCP server to your MCP client
+  - `-c, --client <client>`: Target MCP client (cursor, gemini-cli)
+  - `-g, --global`: Install globally (optional)
+
+## Tools
+
+- `{tool-name}`: {tool description}
+
+## Prompts
+
+- `{prompt-name}`: {prompt description}
+```
+
+## 规则要点
+
+1. **使用 pnpm 包管理器**: 所有命令使用 `pnpm` 而不是 `npm` 或 `yarn`
+2. **Monorepo 结构**: 所有 MCP server 放在 `packages/` 目录下
+3. **TypeScript 支持**: 所有文件使用 TypeScript
+4. **标准化命名**: 
+   - 包名使用 kebab-case: `example-mcp`
+   - CLI 命令名使用 kebab-case: `example-mcp`
+   - 工具名使用 kebab-case: `example-tool`
+   - 提示词名使用 kebab-case: `example-prompt`
+   - 文件名使用 camelCase: `exampleTool.ts`, `examplePrompt.ts`
+5. **依赖管理**: 
+   - 使用 catalog 模式管理通用依赖版本
+   - MCP SDK 版本统一管理
+   - 依赖 `@mcp-servers/core` 获取 install 命令功能
+6. **测试支持**: 每个 MCP server 都包含 vitest 测试配置
+7. **开发工具**: 包含 inspector 脚本用于调试
+8. **CLI 功能**: 
+   - 提供标准的 install 命令
+   - 支持全局和项目级别安装
+   - 支持 Cursor 和 Gemini CLI 客户端
+9. **功能支持**: 
+   - 支持 tools 功能：提供可调用的工具函数
+   - 支持 prompts 功能：提供动态生成的提示词模板
+10. **错误处理**: 所有工具和提示词都包含完善的错误处理机制
+11. **参数验证**: 使用 zod 进行参数验证和类型安全
+
+## 生成步骤
+
+当创建新的 MCP server 时：
+
+1. 在 `packages/` 目录下创建新的服务器目录
+2. 根据模板创建所有必要文件
+3. 将 `{server-name}` 等占位符替换为实际值
+4. 根据需求选择性地实现 tools 和 prompts 功能
+5. 提示用户运行 `pnpm install` 安装依赖
+6. 提示用户可以使用 `pnpm inspector` 测试服务器
+7. 提示用户可以使用 CLI 命令安装到 MCP 客户端
+
+## 功能选择
+
+根据 MCP server 的具体需求，可以选择实现以下功能：
+
+- **仅 Tools**: 只实现工具功能，用于提供可调用的 API
+- **仅 Prompts**: 只实现提示词功能，用于提供动态提示词模板
+- **Tools + Prompts**: 同时实现工具和提示词功能，提供完整的 MCP 服务
+- **CLI 安装**: 提供标准的 install 命令，支持安装到各种 MCP 客户端
+
+## CLI 命令说明
+
+### install 命令
+
+`install` 命令用于将 MCP server 安装到指定的 MCP 客户端：
+
+```bash
+{server-name}-mcp install -c <client> [-g]
+```
+
+**参数说明：**
+- `-c, --client <client>`: 目标 MCP 客户端，支持：
+  - `cursor`: Cursor 编辑器
+  - `gemini-cli`: Gemini CLI
+- `-g, --global`: 可选参数，表示全局安装
+
+**安装位置：**
+- 全局安装：用户主目录下的客户端配置目录
+- 项目安装：当前项目目录下的客户端配置目录
+
+**支持的客户端：**
+- **Cursor**: 配置文件位于 `~/.cursor/mcp.json` 或 `./.cursor/mcp.json`
+- **Gemini CLI**: 配置文件位于 `~/.gemini/settings.json` 或 `./.gemini/settings.json`
+
+这个规则确保所有 MCP server 都遵循统一的结构和最佳实践，同时支持现代 MCP 协议的所有核心功能，并提供便捷的 CLI 安装工具。
