@@ -2,6 +2,10 @@
 
 This document outlines the automated workflow for creating a GitHub merge request using the `gh` command-line tool.
 
+## Important Note: Merge Request URL Output
+
+**Throughout this workflow, when a merge request is successfully created, the merge request URL must be prominently displayed to the user.** This URL is the primary output that users need to access their created merge request.
+
 ## Workflow Steps
 
 ### 1. Prerequisite: Check for `gh`
@@ -75,18 +79,26 @@ This document outlines the automated workflow for creating a GitHub merge reques
       ```shell
       gh pr create --title "$title" --body "$description" --base "$base_branch" --reviewer "$reviewers"
       ```
-- **Output**: The URL of the newly created merge request.
+- **Output**: The command will output the URL of the newly created merge request. Capture and display this URL prominently to the user.
 - **Error Handling**: If the command fails, provide specific error messages and suggestions for resolution.
 
 ### 7. Post-Creation Actions
 - **Trigger**: Merge request is successfully created.
 - **Action**:
-    - Display the merge request URL to the user
-    - Optionally open the merge request in the default browser:
+    - **Display Merge Request URL**: Immediately show the merge request URL in a clear, prominent format:
+      ```
+      ✅ Merge Request Created Successfully!
+      
+      🔗 URL: [Merge Request URL from step 6]
+      📝 Title: [Title of the merge request]
+      🎯 Base Branch: [Base branch name]
+      🌿 Source Branch: [Current branch name]
+      ```
+    - **Optional Browser Opening**: Ask user if they want to open the merge request in browser:
       ```shell
       gh pr view --web
       ```
-    - Provide next steps and recommendations:
+    - **Provide Next Steps**: Give recommendations for follow-up actions:
         - Review the merge request description
         - Add any additional context or screenshots
         - Request reviews from team members
@@ -95,14 +107,14 @@ This document outlines the automated workflow for creating a GitHub merge reques
 ### 8. Summary and Confirmation
 - **Trigger**: All post-creation actions are complete.
 - **Action**:
-    - Generate a summary of the created merge request including:
-        1. **Merge Request URL**: Direct link to the created PR
-        2. **Title**: The title of the merge request
-        3. **Base Branch**: The target branch
-        4. **Current Branch**: The source branch
-        5. **Status**: Current status (draft, ready for review, etc.)
-        6. **Next Steps**: Recommended actions for the user
-- **Output**: A comprehensive summary presented to the user in the chat interface.
+    - Generate a final summary of the created merge request including:
+        1. **🔗 Merge Request URL**: Direct link to the created PR (most important - display prominently)
+        2. **📝 Title**: The title of the merge request
+        3. **🎯 Base Branch**: The target branch
+        4. **🌿 Current Branch**: The source branch
+        5. **📊 Status**: Current status (draft, ready for review, etc.)
+        6. **📋 Next Steps**: Recommended actions for the user
+- **Output**: A comprehensive summary presented to the user in the chat interface with the merge request URL highlighted and easily accessible.
 
 ## Error Handling Guidelines
 
