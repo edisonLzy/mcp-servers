@@ -1,0 +1,149 @@
+# AI Code Review Workflow for GitHub Merge Requests
+
+This document outlines the automated workflow for conducting a code review on a GitHub merge request using an AI assistant integrated with `gh`.
+
+## Workflow Steps
+
+### 1. Prerequisite: Check for `gh`
+- **Trigger**: The code review process is initiated.
+- **Action**:
+    - Verify that the `gh` command-line tool is installed and available in the system's PATH.
+    - Execute the following shell command:
+      ```shell
+      command -v gh
+      ```
+- **Success**: The command returns a path to the `gh` executable and exits with a status code of 0. The workflow proceeds to the next step.
+- **Error Handling**: If the command fails (returns a non-zero exit code), the workflow is aborted. The user is notified with the following message: "Error: `gh` command not found. Please install the GitHub CLI (`gh`) to proceed. You can find installation instructions at: https://docs.github.com/en/github-cli/getting-started-with-github-cli"
+
+### 2. Extract Pull Request ID
+
+- **Trigger**: User provides a pull request URL (and `gh` is installed).
+- **Input**: A URL string, e.g., `"https://github.com/owner/repo/pull/57"`.
+- **Action**:
+    - Parse the input string using regular expressions or string manipulation to extract the numerical ID at the end of the URL.
+    - **Example Regex**: `\\/pull\\/(\\d+)/`
+- **Output**: The extracted pull request ID (e.g., `57`).
+- **Error Handling**: If no ID can be extracted, ask the user to provide a valid pull request URL or ID.
+
+### 3. Fetch Pull Request Information
+
+- **Trigger**: A valid pull request ID is successfully extracted.
+- **Input**: The pull request ID.
+- **Action**:
+    - Execute the following shell commands to get comprehensive PR information:
+      ```shell
+      # Get PR details
+      gh pr view <id> --json title,url,state,author,createdAt,updatedAt,mergeable,reviewDecision,additions,deletions,changedFiles
+      
+      # Get PR diff
+      gh pr diff <id>
+      ```
+    - Capture the full output (stdout) of both commands.
+- **Output**: 
+    - A JSON object containing PR metadata (title, URL, state, author, etc.)
+    - A string containing the complete diff of the pull request.
+- **Error Handling**: If the `gh` command fails (e.g., invalid ID, authentication issue), report the error to the user.
+
+### 4. Analyze Diff and Generate Review Suggestions
+
+- **Trigger**: The pull request information has been successfully fetched.
+- **Input**: The diff string and PR metadata.
+- **Action**:
+    - The AI model will analyze the diff based on a predefined set of instructions and best practices. The core prompt for this step should include the following directives:
+        - "You are an expert code reviewer. Your goal is to provide constructive, clear, and actionable feedback."
+        - "Analyze the following code changes for potential issues, including but not limited to: bugs, performance bottlenecks, security vulnerabilities, unclear logic, and deviations from common best practices (e.g., DRY, SOLID)."
+        - "Pay attention to the existing code style and conventions within the project and highlight any inconsistencies."
+        - "Structure your feedback by file and line number where applicable. **Extract the relevant code snippet for each suggestion.**"
+        - "**Crucially, you must only provide suggestions and explanations. Do not write or modify the code yourself.** Your output should be a list of comments and recommendations."
+        - "Praise good practices and well-written code where you see it."
+- **Output**: A structured list of review comments, suggestions, and questions, where each suggestion includes the relevant file, line number, and code snippet.
+
+### 5. Add Actionable TODOs to Pull Request
+
+- **Trigger**: The review analysis is complete.
+- **Input**: The list of generated review suggestions, each associated with a specific file path and code snippet.
+- **Action**:
+    - For each significant and actionable suggestion, create a review comment on the pull request.
+    - The comment should be in Chinese and quote the relevant code to provide clear context.
+    - To safely pass a multi-line message with special characters, use a combination of command substitution (`$()`) and a "here document" (`<<'EOF'`). The command format should be:
+      ```shell
+      gh pr review <id> --comment --body "$(cat <<'EOF'
+代码评审建议 `[file_path]`:
+
+```[language]
+[code snippet to reference]
+```
+
+[具体的建议详情]
+EOF
+)"
+      ```
+    - **Example**:
+      ```shell
+      gh pr review 57 --comment --body "$(cat <<'EOF'
+代码评审建议 `src/api/group.ts`:
+
+```typescript
+// API 接口路径
+export const getGroupInfoApi = '/api/group/info';
+export const getGroupMembersApi = '/api/group/members';
+```
+
+建议将这些硬编码的 API 路径移动到专门的常量文件中，以提高可维护性。
+EOF
+)"
+      ```
+- **Output**: A confirmation message for each review comment added, or a summary of all comments created.
+- **Note**: This step makes the feedback directly visible and actionable for the author within the GitHub UI. Using `$(cat <<'EOF' ... EOF)` is a robust method to prevent the shell from misinterpreting the comment's content.
+
+### 6. Generate Comprehensive Review Summary
+
+- **Trigger**: All review suggestions have been processed and added as comments.
+- **Input**: The complete set of review suggestions and PR metadata.
+- **Action**:
+    - Generate a comprehensive review summary that includes:
+        1. **Merge Request 基本信息**:
+           - **🔗 URL**: 完整的 Merge Request URL
+           - **📝 标题**: Merge Request 标题
+           - **👤 作者**: 创建者信息
+           - **📅 创建时间**: 创建和更新时间
+           - **📊 状态**: 当前状态（开放、已合并、已关闭等）
+           - **🔍 审查状态**: 审查决策状态
+           - **📈 变更统计**: 添加行数、删除行数、变更文件数
+        2. **代码审查概览**:
+           - **总体评估**: 对合并请求质量的简要总结
+           - **主要发现**: 最重要的建议或需要进行的更改
+           - **正面反馈**: 做得好的地方
+           - **质量评分**: 各维度的评分（代码质量、架构设计、文档完整性等）
+        3. **合并建议**: 是否推荐合并，以及合并前的注意事项
+- **Output**: A comprehensive summary presented to the user in a structured format with clear sections and visual indicators.
+
+### 7. Display Final Results
+
+- **Trigger**: The comprehensive review summary has been generated.
+- **Action**:
+    - Present the final results in a clear, structured format:
+      ```
+      ## 🎯 代码审查完成
+
+      ### 📋 Merge Request 信息
+      🔗 **URL**: [Merge Request URL]
+      📝 **标题**: [Title]
+      👤 **作者**: [Author]
+      📅 **创建时间**: [Created At]
+      📊 **状态**: [State]
+      🔍 **审查状态**: [Review Decision]
+      📈 **变更统计**: +[additions] -[deletions] 📁[changedFiles]
+
+      ### 📊 代码审查概览
+      [Comprehensive review summary from step 6]
+
+      ### 🚀 合并建议
+      [Merge recommendation and next steps]
+      ```
+    - Ensure the Merge Request URL is prominently displayed and easily accessible.
+    - Provide clear next steps for the user.
+- **Output**: The final structured results are presented to the user in the chat interface.
+
+---
+**End of Workflow**

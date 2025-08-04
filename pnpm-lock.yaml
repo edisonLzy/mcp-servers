@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@modelcontextprotocol/sdk':
-      specifier: ^1.12.1
-      version: 1.12.1
+      specifier: ^1.17.1
+      version: 1.17.1
     commander:
       specifier: ^14.0.0
       version: 14.0.0
@@ -89,7 +89,7 @@ importers:
         version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
-        version: 1.12.1
+        version: 1.17.1
       axios:
         specifier: ^1.9.0
         version: 1.9.0
@@ -124,6 +124,15 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.17.25
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
 
   packages/core:
     dependencies:
@@ -163,7 +172,7 @@ importers:
         version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
-        version: 1.12.1
+        version: 1.17.1
       axios:
         specifier: ^1.6.0
         version: 1.9.0
@@ -209,7 +218,7 @@ importers:
         version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
-        version: 1.12.1
+        version: 1.17.1
       axios:
         specifier: ^1.6.0
         version: 1.9.0
@@ -242,11 +251,42 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/debug@4.1.12)(@types/node@20.17.25)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.7.0)
 
+  packages/prompts-mcp:
+    dependencies:
+      '@mcp-servers/core':
+        specifier: link:../core
+        version: link:../core
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.17.1
+      commander:
+        specifier: 'catalog:'
+        version: 14.0.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.42
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.17.25
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@20.17.25)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.7.0)
+
   packages/weapons-mcp:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
-        version: 1.12.1
+        version: 1.17.1
       commander:
         specifier: 'catalog:'
         version: 14.0.0
@@ -650,8 +690,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
-  '@modelcontextprotocol/sdk@1.12.1':
-    resolution: {integrity: sha512-KG1CZhZfWg+u8pxeM/mByJDScJSrjjxLc8fwQqbsS8xCjBmQfMNEBTotYdNanKekepnfRI85GtgQlctLFpcYPw==}
+  '@modelcontextprotocol/sdk@1.17.1':
+    resolution: {integrity: sha512-CPle1OQehbWqd25La9Ack5B07StKIxh4+Bf19qnpZKJC1oI22Y0czZHbifjw1UoczIfKBwBDAp/dFxvHG13B5A==}
     engines: {node: '>=18'}
 
   '@napi-rs/wasm-runtime@0.2.12':
@@ -3811,13 +3851,14 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
-  '@modelcontextprotocol/sdk@1.12.1':
+  '@modelcontextprotocol/sdk@1.17.1':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
       cors: 2.8.5
       cross-spawn: 7.0.6
       eventsource: 3.0.7
+      eventsource-parser: 3.0.2
       express: 5.1.0
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
