@@ -1,7 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
-import { join } from 'node:path';
+import path, { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const GhCodeReviewSchema = z.object({
   prUrl: z.string().url().regex(/github\.com\/[^\/]+\/[^\/]+\/pull\/\d+/, {
@@ -17,8 +18,10 @@ export function registerGhCodeReviewPrompt(server: McpServer) {
     async (args) => {
       const validated = GhCodeReviewSchema.parse(args);
       const prUrl = validated.prUrl;
-      
+
       // 读取工作流程定义
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
       const workflowPath = join(__dirname, '../workflows/ai-code-review-gh.mdc');
       const workflowContent = await readFile(workflowPath, 'utf-8');
       
