@@ -1,6 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { registerExamplePrompt } from './prompts/example.js';
+import { registerGhCreateMrPrompt } from './prompts/gh-create-mr.js';
+import { registerGhCodeReviewPrompt } from './prompts/gh-code-review.js';
+import { registerGhAutoMrFlowPrompt } from './prompts/gh-auto-mr-flow.js';
 
 async function main() {
   // Create an MCP server
@@ -17,7 +19,9 @@ async function main() {
   );
 
   // Add prompts
-  registerExamplePrompt(server);
+  registerGhCreateMrPrompt(server);
+  registerGhCodeReviewPrompt(server);
+  registerGhAutoMrFlowPrompt(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
