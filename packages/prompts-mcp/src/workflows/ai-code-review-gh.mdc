@@ -25,23 +25,29 @@ This document outlines the automated workflow for conducting a code review on a 
 - **Output**: The extracted pull request ID (e.g., `57`).
 - **Error Handling**: If no ID can be extracted, ask the user to provide a valid pull request URL or ID.
 
-### 3. Fetch Pull Request Diff
+### 3. Fetch Pull Request Information
 
 - **Trigger**: A valid pull request ID is successfully extracted.
 - **Input**: The pull request ID.
 - **Action**:
-    - Execute the following shell command:
+    - Execute the following shell commands to get comprehensive PR information:
       ```shell
+      # Get PR details
+      gh pr view <id> --json title,url,state,author,createdAt,updatedAt,mergeable,reviewDecision,additions,deletions,changedFiles
+      
+      # Get PR diff
       gh pr diff <id>
       ```
-    - Capture the full output (stdout) of the command.
-- **Output**: A string containing the complete diff of the pull request.
+    - Capture the full output (stdout) of both commands.
+- **Output**: 
+    - A JSON object containing PR metadata (title, URL, state, author, etc.)
+    - A string containing the complete diff of the pull request.
 - **Error Handling**: If the `gh` command fails (e.g., invalid ID, authentication issue), report the error to the user.
 
 ### 4. Analyze Diff and Generate Review Suggestions
 
-- **Trigger**: The pull request diff has been successfully fetched.
-- **Input**: The diff string.
+- **Trigger**: The pull request information has been successfully fetched.
+- **Input**: The diff string and PR metadata.
 - **Action**:
     - The AI model will analyze the diff based on a predefined set of instructions and best practices. The core prompt for this step should include the following directives:
         - "You are an expert code reviewer. Your goal is to provide constructive, clear, and actionable feedback."
@@ -90,17 +96,54 @@ EOF
 - **Output**: A confirmation message for each review comment added, or a summary of all comments created.
 - **Note**: This step makes the feedback directly visible and actionable for the author within the GitHub UI. Using `$(cat <<'EOF' ... EOF)` is a robust method to prevent the shell from misinterpreting the comment's content.
 
-### 6. Summarize and Present CR Overview
+### 6. Generate Comprehensive Review Summary
 
 - **Trigger**: All review suggestions have been processed and added as comments.
-- **Input**: The complete set of review suggestions.
+- **Input**: The complete set of review suggestions and PR metadata.
 - **Action**:
-    - Generate a high-level, concise overview of the code review in Chinese.
-    - The overview should include:
-        1.  **总体评估**: 对合并请求质量的简要总结（例如，"优秀的工作，在解决一些小问题后即可合并，"或"这是一个可靠的贡献，但在合并前需要关注以下几个方面。"）。
-        2.  **主要发现**: 以项目符号形式突出最重要的建议或需要进行的更改（例如，潜在的错误、架构问题）。
-        3.  **正面反馈**: 简要提及做得好的地方。
-- **Output**: The final CR overview is presented to the user in the chat interface in Chinese.
+    - Generate a comprehensive review summary that includes:
+        1. **Merge Request 基本信息**:
+           - **🔗 URL**: 完整的 Merge Request URL
+           - **📝 标题**: Merge Request 标题
+           - **👤 作者**: 创建者信息
+           - **📅 创建时间**: 创建和更新时间
+           - **📊 状态**: 当前状态（开放、已合并、已关闭等）
+           - **🔍 审查状态**: 审查决策状态
+           - **📈 变更统计**: 添加行数、删除行数、变更文件数
+        2. **代码审查概览**:
+           - **总体评估**: 对合并请求质量的简要总结
+           - **主要发现**: 最重要的建议或需要进行的更改
+           - **正面反馈**: 做得好的地方
+           - **质量评分**: 各维度的评分（代码质量、架构设计、文档完整性等）
+        3. **合并建议**: 是否推荐合并，以及合并前的注意事项
+- **Output**: A comprehensive summary presented to the user in a structured format with clear sections and visual indicators.
+
+### 7. Display Final Results
+
+- **Trigger**: The comprehensive review summary has been generated.
+- **Action**:
+    - Present the final results in a clear, structured format:
+      ```
+      ## 🎯 代码审查完成
+
+      ### 📋 Merge Request 信息
+      🔗 **URL**: [Merge Request URL]
+      📝 **标题**: [Title]
+      👤 **作者**: [Author]
+      📅 **创建时间**: [Created At]
+      📊 **状态**: [State]
+      🔍 **审查状态**: [Review Decision]
+      📈 **变更统计**: +[additions] -[deletions] 📁[changedFiles]
+
+      ### 📊 代码审查概览
+      [Comprehensive review summary from step 6]
+
+      ### 🚀 合并建议
+      [Merge recommendation and next steps]
+      ```
+    - Ensure the Merge Request URL is prominently displayed and easily accessible.
+    - Provide clear next steps for the user.
+- **Output**: The final structured results are presented to the user in the chat interface.
 
 ---
 **End of Workflow**

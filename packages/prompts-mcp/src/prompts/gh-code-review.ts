@@ -41,10 +41,17 @@ ${workflowContent}
 请严格按照工作流程中的步骤执行：
 1. 首先检查 gh CLI 是否可用
 2. 从 URL 中提取 Pull Request ID
-3. 获取 Pull Request 的 diff
+3. 获取 Pull Request 的详细信息和 diff
 4. 分析 diff 并生成审查建议
 5. 将可执行的建议作为评论添加到 Pull Request
-6. 生成并展示代码审查概览
+6. 生成综合的代码审查概览
+7. 显示最终结果，包括：
+   - Merge Request 的完整 URL
+   - Merge Request 的基本信息（标题、作者、状态、变更统计等）
+   - 代码审查概览和评分
+   - 合并建议和后续步骤
+
+**重要**: 在完成代码审查后，必须清晰地输出 Merge Request 的 URL 和完整的概览信息，确保用户能够轻松访问和了解审查结果。
 
 请开始执行代码审查流程。`,
             },
