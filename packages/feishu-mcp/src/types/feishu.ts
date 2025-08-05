@@ -16,10 +16,19 @@ export interface WikiSpace {
 export interface WikiNode {
   node_token: string;
   obj_token: string;
-  obj_type: 'doc' | 'sheet' | 'bitable' | 'folder' | 'file';
+  obj_type: 'doc' | 'docx' | 'sheet' | 'mindnote' | 'bitable' | 'file' | 'slides';
   title: string;
   has_child?: boolean;
   parent_node_token?: string;
+  node_type?: 'origin' | 'shortcut';
+  origin_node_token?: string;
+  origin_space_id?: string;
+  obj_create_time?: string;
+  obj_edit_time?: string;
+  node_create_time?: string;
+  creator?: string;
+  owner?: string;
+  node_creator?: string;
 }
 
 // Document types
@@ -29,6 +38,69 @@ export interface Document {
   revision: number;
   content?: string;
   url?: string;
+}
+
+// Document Block types
+export interface DocumentBlock {
+  block_id: string;
+  block_type: number;
+  parent_id?: string;
+  children?: string[];
+  text?: {
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style?: Record<string, any>;
+      };
+      mention_user?: {
+        user_id: string;
+        text_element_style?: Record<string, any>;
+      };
+      equation?: {
+        content: string;
+        text_element_style?: Record<string, any>;
+      };
+      [key: string]: any;
+    }>;
+    style?: Record<string, any>;
+  };
+  heading1?: {
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style?: Record<string, any>;
+      };
+      [key: string]: any;
+    }>;
+    style?: Record<string, any>;
+  };
+  heading2?: {
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style?: Record<string, any>;
+      };
+      [key: string]: any;
+    }>;
+    style?: Record<string, any>;
+  };
+  heading3?: {
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style?: Record<string, any>;
+      };
+      [key: string]: any;
+    }>;
+    style?: Record<string, any>;
+  };
+  [key: string]: any;
+}
+
+export interface ListDocumentBlocksResponse {
+  items: DocumentBlock[];
+  has_more: boolean;
+  page_token?: string;
 }
 
 // Base response types

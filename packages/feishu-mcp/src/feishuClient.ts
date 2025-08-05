@@ -9,7 +9,8 @@ import type {
   Document,
   CreateDocumentRequest,
   UpdateDocumentRequest,
-  UserInfo
+  UserInfo,
+  WikiNode
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -119,13 +120,15 @@ export class FeishuClient {
 
   async createWikiNode(spaceId: string, data: {
     obj_type: string;
-    title: string;
+    node_type: string;
+    title?: string;
     parent_node_token?: string;
-  }): Promise<{ node_token: string; obj_token: string }> {
+    origin_node_token?: string;
+  }): Promise<WikiNode> {
     const headers = await this.getAuthHeaders();
     
     interface CreateNodeResponse extends FeishuResponse {
-      data: { node_token: string; obj_token: string };
+      data: { node: WikiNode };
     }
     
     const response = await this.httpClient.post<CreateNodeResponse>(
@@ -134,7 +137,7 @@ export class FeishuClient {
       { headers }
     );
 
-    return response.data.data;
+    return response.data.data.node;
   }
 
   // Document API methods
