@@ -10,7 +10,9 @@ import type {
   CreateDocumentRequest,
   UpdateDocumentRequest,
   UserInfo,
-  WikiNode
+  WikiNode,
+  ListDocumentBlocksResponse,
+  DocumentRawContentResponse
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -214,6 +216,26 @@ export class FeishuClient {
     return { revision: response.data.data.document.revision_id };
   }
 
+  async getDocumentBlocks(documentId: string, pageToken?: string): Promise<ListDocumentBlocksResponse> {
+    const headers = await this.getAuthHeaders();
+    const params: Record<string, any> = {};
+    
+    if (pageToken) {
+      params.page_token = pageToken;
+    }
+
+    interface GetDocumentBlocksResponse extends FeishuResponse {
+      data: ListDocumentBlocksResponse;
+    }
+
+    const response = await this.httpClient.get<GetDocumentBlocksResponse>(
+      `/docx/v1/documents/${documentId}/blocks`,
+      { headers, params }
+    );
+
+    return response.data.data;
+  }
+
   async getCurrentUser(): Promise<UserInfo> {
     const headers = await this.getAuthHeaders();
     
@@ -223,11 +245,28 @@ export class FeishuClient {
       };
     }
 
-    const response = await this.httpClient.get<GetCurrentUserResponse>(
-      '/contact/v3/users/me',
-      { headers }
-    );
+    const response = await this.httpClient.get<GetCurrentUserResponse>('/contact/v3/users/me', {
+      headers
+    });
 
     return response.data.data.user;
+  }
+
+  async getDocumentRawContent(documentId: string, lang: number = 0): Promise<DocumentRawContentResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface GetDocumentRawContentResponse extends FeishuResponse {
+      data: DocumentRawContentResponse;
+    }
+
+    const response = await this.httpClient.get<GetDocumentRawContentResponse>(
+      `/docx/v1/documents/${documentId}/raw_content`,
+      {
+        headers,
+        params: { lang }
+      }
+    );
+
+    return response.data.data;
   }
 }

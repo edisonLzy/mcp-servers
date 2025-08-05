@@ -7,9 +7,7 @@ import { FeishuClient } from './feishuClient.js';
 import { registerListWikiSpacesTool } from './tools/wiki/listSpaces.js';
 import { registerGetSpaceNodesTool } from './tools/wiki/getSpaceNodes.js';
 import { registerCreateWikiNodeTool } from './tools/wiki/createNode.js';
-import { registerCreateDocumentTool } from './tools/docs/createDoc.js';
-import { registerGetDocumentContentTool } from './tools/docs/getDocContent.js';
-import { registerUpdateDocumentTool } from './tools/docs/updateDoc.js';
+import { registerGetWikiDocumentContentTool } from './tools/wiki/getDocumentContent.js';
 import { TokenStore } from './auth/tokenStore.js';
 
 dotenv.config();
@@ -36,9 +34,7 @@ async function main() {
   registerListWikiSpacesTool(server, feishuClient);
   registerGetSpaceNodesTool(server, feishuClient);
   registerCreateWikiNodeTool(server, feishuClient);
-  registerCreateDocumentTool(server, feishuClient);
-  registerGetDocumentContentTool(server, feishuClient);
-  registerUpdateDocumentTool(server, feishuClient);
+  registerGetWikiDocumentContentTool(server, feishuClient);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();

@@ -79,6 +79,40 @@ Create a new node in a Wiki space.
 }
 ```
 
+#### `get-wiki-document-content`
+Get the content of a Feishu knowledge base document.
+
+**Parameters**:
+- `document_id` (required): The document ID (obj_token when obj_type is docx)
+- `include_children` (optional, default: true): Whether to include child blocks
+- `format` (optional, default: "structured"): Output format (structured|text)
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "format": "structured",
+  "blocks": [
+    {
+      "block_id": "doxcnAJ9VRRJqVMYZ1MyKnayXWe",
+      "block_type": 1,
+      "text": {
+        "elements": [
+          {
+            "text_run": {
+              "content": "Document content..."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "block_count": 10,
+  "total_blocks": 15
+}
+```
+
 ### Document Tools
 
 #### `create-document`

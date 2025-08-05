@@ -168,3 +168,8 @@ export interface FeishuError {
   message: string;
   details?: Record<string, any>;
 }
+
+// Document raw content response
+export interface DocumentRawContentResponse {
+  content: string;
+}
