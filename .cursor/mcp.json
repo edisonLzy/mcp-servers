@@ -1,25 +1,12 @@
 {
   "mcpServers": {
-    "feishu": {
-      "command": "tsx",
+    "lark_open_doc_search": {
+      "command": "npx",
       "args": [
-        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/feishu-mcp/src/index.ts"
-      ],
-      "type": "stdio"
-    },
-    "weapons": {
-      "command": "tsx",
-      "args": [
-        "/Users/evan/Desktop/coding/mcp-servers/packages/weapons-mcp/src/index.ts"
-      ],
-      "type": "stdio"
-    },
-    "prompts-mcp": {
-      "command": "tsx",
-      "args": [
-        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/prompts-mcp/src/index.ts"
-      ],
-      "type": "stdio"
+        "-y",
+        "@larksuiteoapi/lark-mcp",
+        "recall-developer-documents"
+      ]
     }
   }
 }
