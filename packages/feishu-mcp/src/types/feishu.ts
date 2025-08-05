@@ -173,3 +173,337 @@ export interface FeishuError {
 export interface DocumentRawContentResponse {
   content: string;
 }
+
+// Document editing types
+export interface TextElementStyle {
+  bold?: boolean;
+  italic?: boolean;
+  strikethrough?: boolean;
+  underline?: boolean;
+  inline_code?: boolean;
+  background_color?: number;
+  text_color?: number;
+  link?: {
+    url: string;
+  };
+}
+
+export interface TextElement {
+  text_run?: {
+    content: string;
+    text_element_style?: TextElementStyle;
+  };
+  mention_user?: {
+    user_id: string;
+    text_element_style?: TextElementStyle;
+  };
+  equation?: {
+    content: string;
+    text_element_style?: TextElementStyle;
+  };
+}
+
+export interface BlockStyle {
+  align?: number; // 1: left, 2: center, 3: right
+  folded?: boolean;
+  background_color?: number;
+  indent_level?: number;
+}
+
+export interface CreateBlockRequest {
+  block_type: number;
+  text?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading1?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading2?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading3?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading4?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading5?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading6?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading7?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading8?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  heading9?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  bullet?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  ordered?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  code?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+    language?: number;
+  };
+  quote?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  todo?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+}
+
+export interface CreateBlocksRequest {
+  index: number;
+  children: CreateBlockRequest[];
+}
+
+export interface UpdateBlockRequest {
+  update_text_elements?: {
+    elements: TextElement[];
+  };
+  update_text_style?: {
+    fields: number[];
+    style: BlockStyle;
+  };
+}
+
+export interface DeleteBlocksRequest {
+  start_index: number;
+  end_index: number;
+}
+
+export interface CreateBlocksResponse {
+  children: DocumentBlock[];
+  document_revision_id: number;
+  client_token?: string;
+}
+
+export interface UpdateBlockResponse {
+  document_revision_id: number;
+  client_token?: string;
+}
+
+export interface DeleteBlocksResponse {
+  document_revision_id: number;
+  client_token?: string;
+}
+
+// Convert content to blocks types
+export interface ConvertContentToBlocksRequest {
+  content_type: 'markdown' | 'html';
+  content: string;
+}
+
+export interface ConvertedBlock {
+  block_id: string;
+  revision_id: number;
+  parent_id: string;
+  children?: string[];
+  block_type: number;
+  text?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  heading1?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  heading2?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  heading3?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  bullet?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  ordered?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  code?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+    language?: number;
+    wrap?: boolean;
+  };
+  quote?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+  };
+  todo?: {
+    style: {
+      folded: boolean;
+      align: number;
+    };
+    elements: Array<{
+      text_run?: {
+        content: string;
+        text_element_style: {
+          bold: boolean;
+          italic: boolean;
+          strikethrough: boolean;
+          underline: boolean;
+          inline_code: boolean;
+        };
+      };
+    }>;
+    done?: boolean;
+  };
+  table?: {
+    cells: string[];
+    property: {
+      row_size: number;
+      column_size: number;
+      column_width: number[];
+      merge_info: Array<{
+        row_span: number;
+        col_span: number;
+      }>;
+    };
+  };
+  table_cell?: Record<string, any>;
+}
+
+export interface ConvertContentToBlocksResponse {
+  first_level_block_ids: string[];
+  blocks: ConvertedBlock[];
+}

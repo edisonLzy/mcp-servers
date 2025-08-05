@@ -12,7 +12,15 @@ import type {
   UserInfo,
   WikiNode,
   ListDocumentBlocksResponse,
-  DocumentRawContentResponse
+  DocumentRawContentResponse,
+  CreateBlocksRequest,
+  CreateBlocksResponse,
+  UpdateBlockRequest,
+  UpdateBlockResponse,
+  DeleteBlocksRequest,
+  DeleteBlocksResponse,
+  ConvertContentToBlocksRequest,
+  ConvertContentToBlocksResponse
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -265,6 +273,80 @@ export class FeishuClient {
         headers,
         params: { lang }
       }
+    );
+
+    return response.data.data;
+  }
+
+  // Document editing methods
+  async createDocumentBlocks(documentId: string, blockId: string, data: CreateBlocksRequest, documentRevisionId: number = -1): Promise<CreateBlocksResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface CreateBlocksApiResponse extends FeishuResponse {
+      data: CreateBlocksResponse;
+    }
+    
+    const response = await this.httpClient.post<CreateBlocksApiResponse>(
+      `/docx/v1/documents/${documentId}/blocks/${blockId}/children`,
+      data,
+      {
+        headers,
+        params: { document_revision_id: documentRevisionId }
+      }
+    );
+
+    return response.data.data;
+  }
+
+  async updateDocumentBlock(documentId: string, blockId: string, data: UpdateBlockRequest, documentRevisionId: number = -1): Promise<UpdateBlockResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface UpdateBlockApiResponse extends FeishuResponse {
+      data: UpdateBlockResponse;
+    }
+    
+    const response = await this.httpClient.patch<UpdateBlockApiResponse>(
+      `/docx/v1/documents/${documentId}/blocks/${blockId}`,
+      data,
+      {
+        headers,
+        params: { document_revision_id: documentRevisionId }
+      }
+    );
+
+    return response.data.data;
+  }
+
+  async deleteDocumentBlocks(documentId: string, blockId: string, data: DeleteBlocksRequest, documentRevisionId: number = -1): Promise<DeleteBlocksResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface DeleteBlocksApiResponse extends FeishuResponse {
+      data: DeleteBlocksResponse;
+    }
+    
+    const response = await this.httpClient.delete<DeleteBlocksApiResponse>(
+      `/docx/v1/documents/${documentId}/blocks/${blockId}/children/batch_delete`,
+      {
+        headers,
+        params: { document_revision_id: documentRevisionId },
+        data
+      }
+    );
+
+    return response.data.data;
+  }
+
+  async convertContentToBlocks(data: ConvertContentToBlocksRequest): Promise<ConvertContentToBlocksResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface ConvertContentResponse extends FeishuResponse {
+      data: ConvertContentToBlocksResponse;
+    }
+
+    const response = await this.httpClient.post<ConvertContentResponse>(
+      '/docx/v1/documents/content/blocks',
+      data,
+      { headers }
     );
 
     return response.data.data;
