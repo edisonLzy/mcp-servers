@@ -7,7 +7,7 @@ import { FeishuClient } from './feishuClient.js';
 import { registerListWikiSpacesTool } from './tools/wiki/listSpaces.js';
 import { registerGetSpaceNodesTool } from './tools/wiki/getSpaceNodes.js';
 import { registerCreateWikiNodeTool } from './tools/wiki/createNode.js';
-import { registerGetWikiDocumentContentTool } from './tools/wiki/getDocumentContent.js';
+import { registerGetWikiDocumentContentTool } from './tools/docx/getDocumentContent.js';
 import { TokenStore } from './auth/tokenStore.js';
 
 dotenv.config();
