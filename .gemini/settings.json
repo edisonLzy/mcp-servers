@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "prompts-mcp": {
+      "command": "tsx",
+      "args": [
+        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/prompts-mcp/src/index.ts"
+      ]
+    }
+  }
+}

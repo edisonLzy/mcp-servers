@@ -1,26 +1,28 @@
 {
-  "name": "feishu-mcp",
+  "name": "@mcp-servers/figma",
   "version": "0.1.0",
-  "description": "MCP server for Feishu/Lark integration with Wiki and Document management",
+  "description": "MCP server for Figma integration with design file access, node operations, and team management",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "src/index.ts",
   "bin": {
-    "feishu-mcp": "src/cli.ts"
+    "figma-mcp": "src/cli.ts"
   },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest",
     "inspector": "pnpx @modelcontextprotocol/inspector tsx src/index.ts",
     "dev": "tsx src/index.ts",
-    "cli": "tsx src/cli.ts", 
+    "cli": "tsx src/cli.ts",
     "postinstall": "pnpm link --global"
   },
   "keywords": [
     "mcp",
-    "feishu",
-    "lark",
-    "wiki",
-    "documents",
-    "collaboration"
+    "figma",
+    "design",
+    "api",
+    "typescript"
   ],
   "author": "MCP Servers Team",
   "license": "MIT",
@@ -29,13 +31,11 @@
     "@modelcontextprotocol/sdk": "catalog:",
     "axios": "^1.6.0",
     "commander": "catalog:",
-    "dotenv": "^16.0.0",
-    "express": "^4.18.0",
+    "dotenv": "^16.5.0",
     "inquirer": "^10.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/express": "^4.17.0",
     "@types/inquirer": "^9.0.0",
     "@types/node": "^20.0.0",
     "tsx": "^4.19.4",

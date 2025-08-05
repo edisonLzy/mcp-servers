@@ -1,0 +1,167 @@
+# Create Merge Request Workflow for GitHub
+
+This document outlines the automated workflow for creating a GitHub merge request using the `gh` command-line tool.
+
+## Important Note: Merge Request URL Output
+
+**Throughout this workflow, when a merge request is successfully created, the merge request URL must be prominently displayed to the user.** This URL is the primary output that users need to access their created merge request.
+
+## Workflow Steps
+
+### 1. Prerequisite: Check for `gh`
+- **Trigger**: The merge request creation process is initiated.
+- **Action**:
+    - Verify that the `gh` command-line tool is installed and available in the system's PATH.
+    - Execute the following shell command:
+      ```shell
+      command -v gh
+      ```
+- **Success**: The command returns a path to the `gh` executable and exits with a status code of 0. The workflow proceeds to the next step.
+- **Error Handling**: If the command fails (returns a non-zero exit code), the workflow is aborted. The user is notified with the following message: "Error: `gh` command not found. Please install the GitHub CLI (`gh`) to proceed. You can find installation instructions at: https://docs.github.com/en/github-cli/getting-started-with-github-cli"
+
+### 2. Check Authentication Status
+- **Trigger**: `gh` is confirmed to be installed.
+- **Action**:
+    - Execute the following shell command to check authentication status:
+      ```shell
+      gh auth status
+      ```
+- **Success**: The command returns authentication information and exits with status code 0.
+- **Error Handling**: If authentication fails, prompt the user to run `gh auth login` to authenticate with GitHub.
+
+### 3. Validate Current Repository
+- **Trigger**: Authentication is confirmed.
+- **Action**:
+    - Execute the following shell command to check if the current directory is a Git repository:
+      ```shell
+      gh repo view
+      ```
+- **Success**: The command returns repository information and exits with status code 0.
+- **Error Handling**: If the command fails, notify the user that they must be in a Git repository directory.
+
+### 4. Check Current Branch Status
+- **Trigger**: Repository validation is successful.
+- **Action**:
+    - Execute the following shell commands to check current branch and status:
+      ```shell
+      git branch --show-current
+      git status --porcelain
+      ```
+- **Output**: Current branch name and any uncommitted changes.
+- **Error Handling**: If there are uncommitted changes, prompt the user to commit or stash them before proceeding.
+
+### 5. Collect Merge Request Information
+- **Trigger**: Branch status is confirmed to be clean.
+- **Action**: Collect the following information from the user:
+    - **Title**: A concise, descriptive title for the merge request
+    - **Description**: Detailed description of the changes (optional but recommended)
+    - **Base Branch**: The target branch for the merge (default: main/master)
+    - **Labels**: Any labels to apply to the merge request (optional)
+    - **Assignees**: GitHub usernames to assign to the merge request (optional)
+    - **Reviewers**: GitHub usernames to request reviews from (optional)
+
+### 6. Create the Merge Request
+- **Trigger**: All required information has been collected.
+- **Action**:
+    - Execute the following shell command to create the merge request:
+      ```shell
+      gh pr create --title "$title" --body "$description" --base "$base_branch"
+      ```
+    - If labels are specified:
+      ```shell
+      gh pr create --title "$title" --body "$description" --base "$base_branch" --label "$labels"
+      ```
+    - If assignees are specified:
+      ```shell
+      gh pr create --title "$title" --body "$description" --base "$base_branch" --assignee "$assignees"
+      ```
+    - If reviewers are specified:
+      ```shell
+      gh pr create --title "$title" --body "$description" --base "$base_branch" --reviewer "$reviewers"
+      ```
+- **Output**: The command will output the URL of the newly created merge request. Capture and display this URL prominently to the user.
+- **Error Handling**: If the command fails, provide specific error messages and suggestions for resolution.
+
+### 7. Post-Creation Actions
+- **Trigger**: Merge request is successfully created.
+- **Action**:
+    - **Display Merge Request URL**: Immediately show the merge request URL in a clear, prominent format:
+      ```
+      ✅ Merge Request Created Successfully!
+      
+      🔗 URL: [Merge Request URL from step 6]
+      📝 Title: [Title of the merge request]
+      🎯 Base Branch: [Base branch name]
+      🌿 Source Branch: [Current branch name]
+      ```
+    - **Optional Browser Opening**: Ask user if they want to open the merge request in browser:
+      ```shell
+      gh pr view --web
+      ```
+    - **Provide Next Steps**: Give recommendations for follow-up actions:
+        - Review the merge request description
+        - Add any additional context or screenshots
+        - Request reviews from team members
+        - Set up any required CI/CD checks
+
+### 8. Summary and Confirmation
+- **Trigger**: All post-creation actions are complete.
+- **Action**:
+    - Generate a final summary of the created merge request including:
+        1. **🔗 Merge Request URL**: Direct link to the created PR (most important - display prominently)
+        2. **📝 Title**: The title of the merge request
+        3. **🎯 Base Branch**: The target branch
+        4. **🌿 Current Branch**: The source branch
+        5. **📊 Status**: Current status (draft, ready for review, etc.)
+        6. **📋 Next Steps**: Recommended actions for the user
+- **Output**: A comprehensive summary presented to the user in the chat interface with the merge request URL highlighted and easily accessible.
+
+## Error Handling Guidelines
+
+### Common Issues and Solutions
+
+1. **Authentication Issues**:
+   - Prompt user to run `gh auth login`
+   - Provide link to GitHub CLI documentation
+
+2. **Repository Issues**:
+   - Ensure user is in a Git repository
+   - Check if the repository is connected to GitHub
+
+3. **Branch Issues**:
+   - Verify current branch exists on remote
+   - Check for uncommitted changes
+   - Ensure branch is up to date with base branch
+
+4. **Permission Issues**:
+   - Verify user has write access to the repository
+   - Check if user can create merge requests
+
+5. **Network Issues**:
+   - Check internet connectivity
+   - Verify GitHub API access
+
+## Best Practices
+
+1. **Title Guidelines**:
+   - Use conventional commit format when possible
+   - Keep titles under 72 characters
+   - Be descriptive but concise
+
+2. **Description Guidelines**:
+   - Use markdown formatting
+   - Include context and motivation
+   - Reference related issues or discussions
+   - Add screenshots for UI changes
+
+3. **Branch Naming**:
+   - Use descriptive branch names
+   - Follow team conventions
+   - Include issue numbers when applicable
+
+4. **Review Process**:
+   - Request reviews from appropriate team members
+   - Add relevant labels for categorization
+   - Set up required status checks
+
+**End of Workflow**

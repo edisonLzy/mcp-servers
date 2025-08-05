@@ -35,22 +35,7 @@ program
   .description('Show information about the currently logged in user')
   .action(whoamiCommand);
 
-// Install command
-program
-  .command('install')
-  .description('安装 Feishu MCP Server 到指定的 MCP 客户端')
-  .requiredOption('-c, --client <client>', '指定 MCP 客户端 (cursor, gemini-cli)')
-  .option('-g, --global', '全局安装 (默认为全局)', false)
-  .addHelpText('after', `
-使用示例:
-  $ feishu-mcp install --client cursor
-  $ feishu-mcp install --client gemini-cli
-
-支持的客户端:
-  cursor      - Cursor 编辑器
-  gemini-cli  - Gemini CLI / Claude Desktop
-`)
-  .action(installCommand);
+program.addCommand(installCommand);
 
 // Parse command line arguments
 program.parse(); 
