@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a monorepo for MCP (Model Context Protocol) Servers using pnpm workspaces. The repository contains individual MCP server implementations and a core CLI tool for managing them. The project provides high-quality MCP servers for integrating with external services like Confluence, Feishu/Lark, and Weapons API documentation platform.
+This is a monorepo for MCP (Model Context Protocol) Servers using pnpm workspaces. The repository contains individual MCP server implementations and a core CLI tool for managing them. The project provides high-quality MCP servers for integrating with external services like Feishu/Lark, Figma, and dynamic prompt generation.
 
 ## Development Commands
 
@@ -13,14 +13,14 @@ This is a monorepo for MCP (Model Context Protocol) Servers using pnpm workspace
 - `pnpm lint:fix` - Run ESLint with auto-fix
 - `pnpm test` - Run all tests using Vitest workspace
 - `pnpm coverage` - Run tests with coverage reports
-- `pnpm cli` - Run the CLI tool (equivalent to `pnpm --filter @mcp-servers/core run start`)
 
 ### Package-Specific Commands
 - `pnpm --filter <package-name> <command>` - Run commands in specific packages
-- `pnpm --filter confluence-mcp test` - Run tests for confluence MCP server
+- `pnpm --filter feishu-mcp test` - Run tests for Feishu MCP server
 - `pnpm --filter @mcp-servers/core test` - Run tests for core package
 - `pnpm --filter feishu-mcp dev` - Development mode with hot reload for feishu-mcp
-- `pnpm --filter weapons-mcp dev` - Development mode with hot reload for weapons-mcp
+- `pnpm --filter figma-mcp dev` - Development mode with hot reload for figma-mcp
+- `pnpm --filter prompts-mcp dev` - Development mode with hot reload for prompts-mcp
 
 ### MCP Server Development
 - `pnpm inspector` - Run MCP inspector for testing servers (available in individual MCP server packages)
@@ -31,9 +31,9 @@ This is a monorepo for MCP (Model Context Protocol) Servers using pnpm workspace
 ### Monorepo Structure
 - `packages/` - Contains all MCP server implementations and core utilities
 - `packages/core/` - CLI tool and shared utilities for MCP server management (@mcp-servers/core)
-- `packages/confluence-mcp/` - Example MCP server for Confluence integration (@mcp-servers/confluence)
 - `packages/feishu-mcp/` - Feishu/Lark integration with OAuth and CLI (feishu-mcp)
-- `packages/weapons-mcp/` - Weapons API documentation platform integration (@mcp-servers/weapons)
+- `packages/figma-mcp/` - Figma API integration with design file access (@mcp-servers/figma)
+- `packages/prompts-mcp/` - Dynamic prompt generation server (@mcp-servers/prompts-mcp)
 - `scripts/` - Utility scripts including MCP I/O logger
 
 ### MCP Server Pattern
@@ -57,16 +57,19 @@ packages/{server-name}/
 
 ### Code Conventions
 - Use TypeScript throughout
-- Package names: kebab-case (`confluence-mcp`)
+- Package names: kebab-case (`feishu-mcp`)
 - Tool names: kebab-case (`get-page-content`)
 - File names: camelCase (`getPageContent.ts`)
 - Use Zod for schema validation
 - Follow ESLint configuration (single quotes, 2-space indent, stylistic rules)
 - Entry points should use `#!/usr/bin/env node` shebang for CLI tools
+- Import order: builtin, external, internal, parent, sibling, index, type
+- No unused imports or variables (handled by unused-imports plugin)
+- Consistent type imports using `import type`
 
 ### MCP Server Implementation Pattern
 1. Create `McpServer` instance with name/version and capabilities
-2. Initialize external service clients (FeishuClient, WeaponsClient, etc.)
+2. Initialize external service clients (FeishuClient, FigmaClient, etc.)
 3. Register tools using `server.tools()` method with Zod schemas
 4. Connect using `StdioServerTransport`
 5. Tool functions return `{ content: [{ type: 'text', text: string }], isError?: boolean }`
@@ -89,16 +92,18 @@ packages/{server-name}/
 - Uses `TokenStore` for secure credential management
 - Binary name: `feishu-mcp`
 
-### Weapons MCP Server
-- Simple authentication with config store
-- API documentation focused tools
-- Binary name: `weapons-mcp`
+### Figma MCP Server
+- Personal access token authentication with config store
+- Design file access and node operations
+- Team and project management tools
+- Binary name: `figma-mcp`
 - Includes interactive CLI for setup
 
-### Confluence MCP Server
-- Basic Confluence page interaction
-- Uses HTML parsing with unified/rehype/remark
-- No separate CLI, uses inspector for testing
+### Prompts MCP Server
+- Dynamic prompt generation for GitHub workflows
+- Includes prompts for code review and merge request creation
+- No authentication required
+- Binary name: `prompts-mcp`
 
 ## Testing
 - All packages use Vitest for testing
@@ -108,10 +113,23 @@ packages/{server-name}/
 - Test files should be in `tests/` directory with `.test.ts` extension
 
 ## CLI Tool
-The `@mcp-servers/core` package provides a CLI tool (`clirk`) for managing MCP servers with commands like `install` for server management.
+The `@mcp-servers/core` package provides shared utilities and types for MCP server management. Individual servers have their own CLI tools with commands like `install` for client integration.
 
 ## Build and Development
 - Use `tsx` for direct TypeScript execution during development
 - TypeScript config: ESNext target, ES modules, strict mode, declaration only
 - No build step required for development - run directly with `tsx`
 - Each package can have its own development scripts (`dev`, `inspector`, etc.)
+
+## Commit Conventions
+- Follow [Conventional Commits](https://conventionalcommits.org/) specification
+- Commit types: feat, fix, docs, style, refactor, test, chore, build, ci, perf, revert
+- Format: `<type>(<scope>): <subject>` where scope is package name
+- Use imperative, present tense in subject line
+- Commitlint enforces these conventions with Husky pre-commit hooks
+
+## Dependency Management
+- Uses pnpm with workspace protocol (`workspace:*`) for internal dependencies
+- Common dependencies managed via pnpm catalog in `pnpm-workspace.yaml`
+- Catalog includes: `@modelcontextprotocol/sdk`, `@modelcontextprotocol/inspector`, `commander`, `zod`
+- Individual packages can override catalog versions if needed
