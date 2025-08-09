@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { registerGhCreateMrPrompt } from './prompts/gh-create-mr.js';
 import { registerGhCodeReviewPrompt } from './prompts/gh-code-review.js';
 import { registerGhAutoMrFlowPrompt } from './prompts/gh-auto-mr-flow.js';
+import { registerGitWorktreeDevelopmentPrompt } from './prompts/git-worktree-development.js';
 
 async function main() {
   // Create an MCP server
@@ -22,6 +23,7 @@ async function main() {
   registerGhCreateMrPrompt(server);
   registerGhCodeReviewPrompt(server);
   registerGhAutoMrFlowPrompt(server);
+  registerGitWorktreeDevelopmentPrompt(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
