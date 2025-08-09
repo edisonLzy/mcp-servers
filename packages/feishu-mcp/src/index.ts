@@ -7,9 +7,12 @@ import { FeishuClient } from './feishuClient.js';
 import { registerListWikiSpacesTool } from './tools/wiki/listSpaces.js';
 import { registerGetSpaceNodesTool } from './tools/wiki/getSpaceNodes.js';
 import { registerCreateWikiNodeTool } from './tools/wiki/createNode.js';
-import { registerCreateDocumentTool } from './tools/docs/createDoc.js';
-import { registerGetDocumentContentTool } from './tools/docs/getDocContent.js';
-import { registerUpdateDocumentTool } from './tools/docs/updateDoc.js';
+import { registerGetDocumentBlocksTool } from './tools/docx/getDocumentBlocks.js';
+import { registerGetDocumentRawContentTool } from './tools/docx/getDocumentRawContent.js';
+import { registerCreateDocumentBlocksTool } from './tools/docx/createDocumentBlocks.js';
+import { registerUpdateDocumentBlockTool } from './tools/docx/updateDocumentBlock.js';
+import { registerDeleteDocumentBlocksTool } from './tools/docx/deleteDocumentBlocks.js';
+import { registerConvertContentToBlocksTool } from './tools/docx/convertContentToBlocks.js';
 import { TokenStore } from './auth/tokenStore.js';
 
 dotenv.config();
@@ -36,9 +39,12 @@ async function main() {
   registerListWikiSpacesTool(server, feishuClient);
   registerGetSpaceNodesTool(server, feishuClient);
   registerCreateWikiNodeTool(server, feishuClient);
-  registerCreateDocumentTool(server, feishuClient);
-  registerGetDocumentContentTool(server, feishuClient);
-  registerUpdateDocumentTool(server, feishuClient);
+  registerGetDocumentBlocksTool(server, feishuClient);
+  registerGetDocumentRawContentTool(server, feishuClient);
+  registerCreateDocumentBlocksTool(server, feishuClient);
+  registerUpdateDocumentBlockTool(server, feishuClient);
+  registerDeleteDocumentBlocksTool(server, feishuClient);
+  registerConvertContentToBlocksTool(server, feishuClient);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
