@@ -273,6 +273,60 @@ export interface CreateBlockRequest {
     elements: TextElement[];
     style?: BlockStyle;
   };
+  table?: {
+    property: {
+      row_size: number;
+      column_size: number;
+      column_width?: number[];
+      merge_info?: Array<{
+        row_span: number;
+        col_span: number;
+      }>;
+    };
+    children?: CreateBlockRequest[];
+  };
+  table_cell?: {
+    elements: TextElement[];
+    style?: BlockStyle;
+  };
+  image?: {
+    token: string;
+    width?: number;
+    height?: number;
+  };
+  file?: {
+    token: string;
+    name?: string;
+  };
+  sheet?: {
+    token: string;
+    row_size?: number;
+    column_size?: number;
+  };
+  divider?: Record<string, never>;
+  equation?: {
+    content: string;
+  };
+  callout?: {
+    background_color?: number;
+    border_color?: number;
+    text_color?: number;
+    emoji_id?: string;
+    elements: TextElement[];
+  };
+  column?: {
+    columns: Array<{
+      width_ratio: number;
+      children?: CreateBlockRequest[];
+    }>;
+  };
+  column_set?: {
+    flex_mode: number;
+    background_style?: {
+      color?: number;
+    };
+    children?: CreateBlockRequest[];
+  };
 }
 
 export interface CreateBlocksRequest {

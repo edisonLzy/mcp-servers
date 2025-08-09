@@ -344,7 +344,7 @@ export class FeishuClient {
     }
 
     const response = await this.httpClient.post<ConvertContentResponse>(
-      '/docx/v1/documents/content/blocks',
+      'docx/v1/documents/blocks/convert',
       data,
       { headers }
     );

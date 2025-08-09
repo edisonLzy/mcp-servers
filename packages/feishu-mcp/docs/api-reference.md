@@ -163,6 +163,169 @@ Update the content of a Feishu document.
 }
 ```
 
+#### `get-document-blocks`
+Get structured blocks from a Feishu document.
+
+**Parameters**:
+- `document_id` (required): The document ID
+- `page_token` (optional): Pagination token for large documents
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "blocks": [
+    {
+      "block_id": "doxcnAJ9VRRJqVMYZ1MyKnayXWe",
+      "block_type": 2,
+      "text": {
+        "elements": [
+          {
+            "text_run": {
+              "content": "Block content..."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "has_more": false
+}
+```
+
+#### `convert-content-to-blocks`
+Convert Markdown or HTML content to Feishu document blocks.
+
+**Parameters**:
+- `content_type` (required): Content format ("markdown" | "html")
+- `content` (required): Content to convert (1-10485760 characters)
+
+**Returns**:
+```json
+{
+  "success": true,
+  "content_type": "markdown",
+  "converted_blocks": 5,
+  "first_level_block_ids": ["block1", "block2"],
+  "blocks": [
+    {
+      "block_id": "block1",
+      "block_type": 2,
+      "text": {
+        "elements": [
+          {
+            "text_run": {
+              "content": "Converted content..."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### `create-document-blocks`
+Create new blocks in a Feishu document at the specified position.
+
+**Parameters**:
+- `document_id` (required): The document ID where blocks will be created
+- `block_id` (required): The parent block ID where new blocks will be inserted
+- `index` (required): The position index where blocks will be inserted (0-based)
+- `blocks` (required): Array of block objects to create (usually from convert-content-to-blocks)
+- `document_revision_id` (optional, default: -1): Document revision ID for conflict detection
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "parent_block_id": "doxcnAJ9VRRJqVMYZ1MyKnayXWe",
+  "insertion_index": 0,
+  "created_blocks_count": 3,
+  "document_revision_id": 125,
+  "created_blocks": [
+    {
+      "block_id": "doxcnNewBlock1",
+      "block_type": 2,
+      "parent_id": "doxcnAJ9VRRJqVMYZ1MyKnayXWe"
+    }
+  ]
+}
+```
+
+**Usage Example**:
+```javascript
+// First convert content to blocks
+const convertResult = await convertContentToBlocks({
+  content_type: "markdown",
+  content: "# Hello\n\nThis is a paragraph."
+});
+
+// Then create blocks in document
+ const createResult = await createDocumentBlocks({
+   document_id: "doccnULnB44EMMPSYa3rIb4eJCf",
+   block_id: "doxcnParentBlock",
+   index: 0,
+   blocks: convertResult.blocks
+ });
+ ```
+
+#### `update-document-block`
+Update the content of a specific block in a Feishu document.
+
+**Parameters**:
+- `document_id` (required): The document ID
+- `block_id` (required): The block ID to update
+- `block` (required): The updated block content
+- `document_revision_id` (optional, default: -1): Document revision ID for conflict detection
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "block_id": "doxcnAJ9VRRJqVMYZ1MyKnayXWe",
+  "document_revision_id": 126
+}
+```
+
+#### `delete-document-blocks`
+Delete specific blocks from a Feishu document.
+
+**Parameters**:
+- `document_id` (required): The document ID
+- `block_ids` (required): Array of block IDs to delete
+- `document_revision_id` (optional, default: -1): Document revision ID for conflict detection
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "deleted_blocks_count": 2,
+  "deleted_block_ids": ["doxcnBlock1", "doxcnBlock2"],
+  "document_revision_id": 127
+}
+```
+
+#### `get-document-raw-content`
+Get the raw content of a Feishu document in text format.
+
+**Parameters**:
+- `document_id` (required): The document ID
+- `lang` (optional, default: 0): Language preference (0=auto, 1=zh, 2=en, 3=ja)
+
+**Returns**:
+```json
+{
+  "success": true,
+  "document_id": "doccnULnB44EMMPSYa3rIb4eJCf",
+  "content": "Document title\n\nDocument content in plain text format..."
+}
+```
+
 ## Error Handling
 
 All tools return standardized error responses:

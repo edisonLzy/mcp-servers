@@ -18,35 +18,12 @@ export async function convertContentToBlocks(
   client: FeishuClient,
   args: ConvertContentToBlocksArgs
 ): Promise<ConvertContentToBlocksResponse> {
-  try {
-    // Validate input
-    if (!args.content || args.content.trim().length === 0) {
-      throw new Error('Content cannot be empty');
-    }
+  const request: ConvertContentToBlocksRequest = {
+    content_type: args.content_type,
+    content: args.content
+  };
 
-    if (!['markdown', 'html'].includes(args.content_type)) {
-      throw new Error('Content type must be either "markdown" or "html"');
-    }
-
-    // Check content length (API limit is 10485760 characters)
-    if (args.content.length > 10485760) {
-      throw new Error('Content exceeds maximum length of 10485760 characters');
-    }
-
-    const request: ConvertContentToBlocksRequest = {
-      content_type: args.content_type,
-      content: args.content
-    };
-
-    const response = await client.convertContentToBlocks(request);
-    
-    return response;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to convert content to blocks: ${error.message}`);
-    }
-    throw new Error('Failed to convert content to blocks: Unknown error');
-  }
+  return await client.convertContentToBlocks(request);
 }
 
 export function registerConvertContentToBlocksTool(server: McpServer, client: FeishuClient) {
@@ -67,11 +44,7 @@ export function registerConvertContentToBlocksTool(server: McpServer, client: Fe
               content_type,
               converted_blocks: result.blocks.length,
               first_level_block_ids: result.first_level_block_ids,
-              blocks: result.blocks.map(block => ({
-                block_id: block.block_id,
-                block_type: block.block_type,
-                parent_id: block.parent_id
-              }))
+              blocks: result.blocks
             }, null, 2)
           }]
         };
