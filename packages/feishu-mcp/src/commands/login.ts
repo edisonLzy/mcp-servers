@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { TokenStore } from '../auth/tokenStore.js';
 import { OAuthServer } from '../auth/oauthServer.js';
-import { FEISHU_API_BASE_URL } from '../constant.js';
+import { FEISHU_API_BASE_URL, FEISHU_SCOPES } from '../constant.js';
 
 export async function loginCommand(): Promise<void> {
   console.log('🚀 Feishu MCP Server - Login');
@@ -107,7 +107,7 @@ export async function handleOAuthLogin(tokenStore: TokenStore): Promise<void> {
     domain: FEISHU_API_BASE_URL,
     host: 'localhost',
     port: 3000,
-    scopes: ['wiki:wiki', 'wiki:wiki:readonly', 'docx:document']
+    scopes: FEISHU_SCOPES
   });
 
   // Start the OAuth server

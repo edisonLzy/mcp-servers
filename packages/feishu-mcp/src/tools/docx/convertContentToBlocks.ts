@@ -42,10 +42,7 @@ export async function convertContentToBlocks(
     
     return response;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to convert content to blocks: ${error.message}`);
-    }
-    throw new Error('Failed to convert content to blocks: Unknown error');
+    throw new Error(`Failed to convert content to blocks: ${error}`);
   }
 }
 
