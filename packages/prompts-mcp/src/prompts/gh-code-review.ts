@@ -1,11 +1,11 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { readFile } from 'node:fs/promises';
-import { z } from 'zod';
 import path, { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { z } from 'zod';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 const GhCodeReviewSchema = z.object({
-  prUrl: z.string().url().regex(/github\.com\/[^\/]+\/[^\/]+\/pull\/\d+/, {
+  prUrl: z.string().url().regex(/github\.com\/[^/]+\/[^/]+\/pull\/\d+/, {
     message: '必须是有效的 GitHub Pull Request URL (例如: https://github.com/owner/repo/pull/123)',
   }),
 });

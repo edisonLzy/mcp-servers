@@ -40,7 +40,6 @@ export function createInstallCommand(_options: CreateInstallCommandOptions): Com
     });
 }
 
-
 interface InstallMCPServerOptions {
   clientType: InstallOptions['client'];
   isGlobal: boolean;

@@ -1,9 +1,9 @@
 #!/usr/bin/env -S pnpm tsx
 
-import { Command } from 'commander';
-import { createInstallCommand } from '@mcp-servers/core';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Command } from 'commander';
+import { createInstallCommand } from '@mcp-servers/core';
 
 const program = new Command();
 
@@ -15,7 +15,7 @@ program
 const entryPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'index.ts');
 const installCommand = createInstallCommand({
   name: 'prompts-mcp',
-  entryPath: entryPath,
+  entryPath,
   beforeInstall: async (options) => {
     console.log('🔧 Installing Prompts MCP Server...');
     console.log(`Client: ${options.client}, Global: ${options.global}`);
