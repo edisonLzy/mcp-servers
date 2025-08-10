@@ -22,7 +22,19 @@ import type {
   ConvertContentToBlocksRequest,
   ConvertContentToBlocksResponse,
   SearchWikiRequest,
-  SearchWikiResponse
+  SearchWikiResponse,
+  BitableSearchRecordsRequest,
+  BitableSearchRecordsResponse,
+  BitableCreateRecordRequest,
+  BitableCreateRecordResponse,
+  BitableUpdateRecordRequest,
+  BitableUpdateRecordResponse,
+  BitableDeleteRecordResponse,
+  BitableBatchDeleteRecordsRequest,
+  BitableBatchDeleteRecordsResponse,
+  BitableListTablesResponse,
+  BitableListFieldsResponse,
+  WikiNodeInfoResponse
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -377,6 +389,194 @@ export class FeishuClient {
       { headers }
     );
 
+    return response.data.data;
+  }
+
+  // Bitable API methods
+  async searchBitableRecords(
+    appToken: string, 
+    tableId: string, 
+    data: BitableSearchRecordsRequest = {}, 
+    pageToken?: string, 
+    pageSize: number = 20
+  ): Promise<BitableSearchRecordsResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {
+      page_size: pageSize
+    };
+    
+    if (pageToken) {
+      params.page_token = pageToken;
+    }
+    
+    const response = await this.httpClient.post(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/records/search`,
+      data,
+      {
+        headers,
+        params
+      }
+    );
+    
+    return response.data.data;
+  }
+
+  async createBitableRecord(
+    appToken: string,
+    tableId: string,
+    data: BitableCreateRecordRequest,
+    userIdType?: string,
+    clientToken?: string
+  ): Promise<BitableCreateRecordResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {};
+    if (userIdType) params.user_id_type = userIdType;
+    if (clientToken) params.client_token = clientToken;
+
+    const response = await this.httpClient.post(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/records`,
+      data,
+      {
+        headers,
+        params
+      }
+    );
+    
+    return response.data.data;
+  }
+
+  async updateBitableRecord(
+    appToken: string,
+    tableId: string,
+    recordId: string,
+    data: BitableUpdateRecordRequest,
+    userIdType?: string
+  ): Promise<BitableUpdateRecordResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {};
+    if (userIdType) params.user_id_type = userIdType;
+
+    const response = await this.httpClient.put(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/records/${recordId}`,
+      data,
+      {
+        headers,
+        params
+      }
+    );
+    
+    return response.data.data;
+  }
+
+  async deleteBitableRecord(
+    appToken: string,
+    tableId: string,
+    recordId: string
+  ): Promise<BitableDeleteRecordResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const response = await this.httpClient.delete(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/records/${recordId}`,
+      { headers }
+    );
+    
+    return response.data.data;
+  }
+
+  async batchDeleteBitableRecords(
+    appToken: string,
+    tableId: string,
+    data: BitableBatchDeleteRecordsRequest
+  ): Promise<BitableBatchDeleteRecordsResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const response = await this.httpClient.post(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/records/batch_delete`,
+      data,
+      { headers }
+    );
+    
+    return response.data.data;
+  }
+
+  async listBitableTables(
+    appToken: string,
+    pageToken?: string,
+    pageSize?: number
+  ): Promise<BitableListTablesResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {};
+    if (pageToken) {
+      params.page_token = pageToken;
+    }
+    if (pageSize) {
+      params.page_size = pageSize;
+    }
+    
+    const response = await this.httpClient.get(
+      `/bitable/v1/apps/${appToken}/tables`,
+      {
+        headers,
+        params
+      }
+    );
+    
+    return response.data.data;
+  }
+
+  async listBitableFields(
+    appToken: string,
+    tableId: string,
+    viewId?: string,
+    textFieldAsArray?: boolean,
+    pageToken?: string,
+    pageSize?: number
+  ): Promise<BitableListFieldsResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {};
+    if (viewId) params.view_id = viewId;
+    if (textFieldAsArray !== undefined) params.text_field_as_array = textFieldAsArray;
+    if (pageToken) params.page_token = pageToken;
+    if (pageSize) params.page_size = pageSize;
+    
+    const response = await this.httpClient.get(
+      `/bitable/v1/apps/${appToken}/tables/${tableId}/fields`,
+      { 
+        headers,
+        params
+      }
+    );
+    
+    return response.data.data;
+  }
+
+  async getWikiNodeInfo(
+    token: string,
+    objType?: 'doc' | 'docx' | 'sheet' | 'mindnote' | 'bitable' | 'file' | 'slides' | 'wiki'
+  ): Promise<WikiNodeInfoResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    const params: Record<string, any> = {
+      token
+    };
+    
+    if (objType && objType !== 'wiki') {
+      params.obj_type = objType;
+    }
+
+    const response = await this.httpClient.get(
+      '/wiki/v2/spaces/get_node',
+      {
+        headers,
+        params
+      }
+    );
+    
     return response.data.data;
   }
 }

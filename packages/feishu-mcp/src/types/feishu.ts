@@ -586,3 +586,219 @@ export interface SearchWikiResponse {
   page_token?: string;
   has_more: boolean;
 }
+
+// Bitable (Multi-dimensional Table) types
+export interface BitableRecord {
+  record_id: string;
+  fields: Record<string, any>;
+  created_by?: {
+    id: string;
+    name: string;
+    en_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+  created_time?: number;
+  last_modified_by?: {
+    id: string;
+    name: string;
+    en_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+  last_modified_time?: number;
+  shared_url?: string;
+  record_url?: string;
+}
+
+export interface BitableSearchRecordsRequest {
+  view_id?: string;
+  field_names?: string[];
+  sort?: Array<{
+    field_name: string;
+    desc?: boolean;
+  }>;
+  filter?: {
+    conjunction: 'and' | 'or';
+    conditions: Array<{
+      field_name: string;
+      operator: 'is' | 'isNot' | 'contains' | 'doesNotContain' | 'isEmpty' | 'isNotEmpty' | 'isGreater' | 'isGreaterEqual' | 'isLess' | 'isLessEqual';
+      value?: string[];
+    }>;
+  };
+  automatic_fields?: boolean;
+}
+
+export interface BitableSearchRecordsResponse {
+  items: BitableRecord[];
+  has_more: boolean;
+  page_token?: string;
+  total: number;
+}
+
+// Create record types
+export interface BitableCreateRecordRequest {
+  fields: Record<string, any>;
+}
+
+export interface BitableCreateRecordResponse {
+  record: BitableRecord;
+}
+
+// Update record types
+export interface BitableUpdateRecordRequest {
+  fields: Record<string, any>;
+}
+
+export interface BitableUpdateRecordResponse {
+  record: BitableRecord;
+}
+
+// Delete record types
+export interface BitableDeleteRecordResponse {
+  code: number;
+  msg: string;
+  data: {
+    deleted: boolean;
+    record_id: string;
+  };
+}
+
+// Batch delete records types
+export interface BitableBatchDeleteRecordsRequest {
+  records: string[];
+}
+
+export interface BitableBatchDeleteRecordsResponse {
+  code: number;
+  msg: string;
+  data: {
+    records: Array<{
+      deleted: boolean;
+      record_id: string;
+    }>;
+  };
+}
+
+// Bitable Table types
+export interface BitableTable {
+  table_id: string;
+  name: string;
+  revision: number;
+}
+
+export interface BitableListTablesResponse {
+  items: BitableTable[];
+  has_more: boolean;
+  page_token?: string;
+  total: number;
+}
+
+// Bitable Field types
+export interface BitableFieldProperty {
+  options?: Array<{
+    name: string;
+    id: string;
+    color: number;
+  }>;
+  formatter?: string;
+  date_formatter?: string;
+  auto_fill?: boolean;
+  multiple?: boolean;
+  table_id?: string;
+  table_name?: string;
+  back_field_name?: string;
+  auto_serial?: {
+    type: string;
+    options?: Array<{
+      type: string;
+      value: string;
+    }>;
+  };
+  location?: {
+    input_type: string;
+  };
+  formula_expression?: string;
+  allowed_edit_modes?: {
+    manual: boolean;
+    scan: boolean;
+  };
+  min?: number;
+  max?: number;
+  range_customize?: boolean;
+  currency_code?: string;
+  rating?: {
+    symbol: string;
+  };
+  type?: {
+    data_type: number;
+    ui_property?: {
+      currency_code?: string;
+      formatter?: string;
+      range_customize?: boolean;
+      min?: number;
+      max?: number;
+      date_formatter?: string;
+      rating?: {
+        symbol: string;
+      };
+      ui_type?: string;
+    };
+  };
+  filter_info?: {
+    target_table: string;
+    filter_info: {
+      conjunction: string;
+      conditions: Array<{
+        field_id: string;
+        operator: string;
+        value: string;
+        condition_id: string;
+        field_type: number;
+      }>;
+    };
+  };
+}
+
+export interface BitableField {
+  field_id: string;
+  field_name: string;
+  type: number;
+  property?: BitableFieldProperty;
+  description?: string | Array<{
+    text: string;
+    type: string;
+  }>;
+  is_primary: boolean;
+  ui_type: string;
+  is_hidden?: boolean;
+}
+
+export interface BitableListFieldsResponse {
+  items: BitableField[];
+  has_more: boolean;
+  page_token?: string;
+  total: number;
+}
+
+// Wiki Node Info Response
+export interface WikiNodeInfoResponse {
+  node: {
+    space_id: string;
+    node_token: string;
+    obj_token: string;
+    obj_type: 'doc' | 'docx' | 'sheet' | 'mindnote' | 'bitable' | 'file' | 'slides';
+    parent_node_token?: string;
+    node_type: 'origin' | 'shortcut';
+    origin_node_token?: string;
+    origin_space_id?: string;
+    has_child: boolean;
+    title: string;
+    obj_create_time?: string;
+    obj_edit_time?: string;
+    node_create_time?: string;
+    creator?: string;
+    owner?: string;
+    node_creator?: string;
+  };
+}

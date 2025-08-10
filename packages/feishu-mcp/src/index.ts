@@ -8,12 +8,14 @@ import { registerListWikiSpacesTool } from './tools/wiki/listSpaces.js';
 import { registerGetSpaceNodesTool } from './tools/wiki/getSpaceNodes.js';
 import { registerCreateWikiNodeTool } from './tools/wiki/createNode.js';
 import { registerSearchWikiTool } from './tools/wiki/searchWiki.js';
+import { registerGetNodeInfoTool } from './tools/wiki/getNodeInfo.js';
 import { registerGetDocumentBlocksTool } from './tools/docx/getDocumentBlocks.js';
 import { registerGetDocumentRawContentTool } from './tools/docx/getDocumentRawContent.js';
 import { registerUpdateDocumentBlockTool } from './tools/docx/updateDocumentBlock.js';
 import { registerDeleteDocumentBlocksTool } from './tools/docx/deleteDocumentBlocks.js';
 import { registerConvertContentToBlocksTool } from './tools/docx/convertContentToBlocks.js';
 import { registerCreateDocumentBlocksTool } from './tools/docx/createDocumentBlocks.js';
+import { registerBitableTools } from './tools/bitable/index.js';
 import { TokenStore } from './auth/tokenStore.js';
 
 dotenv.config();
@@ -41,12 +43,14 @@ async function main() {
   registerGetSpaceNodesTool(server, feishuClient);
   registerCreateWikiNodeTool(server, feishuClient);
   registerSearchWikiTool(server, feishuClient);
+  registerGetNodeInfoTool(server, feishuClient);
   registerGetDocumentBlocksTool(server, feishuClient);
   registerGetDocumentRawContentTool(server, feishuClient);
   registerUpdateDocumentBlockTool(server, feishuClient);
   registerDeleteDocumentBlocksTool(server, feishuClient);
   registerConvertContentToBlocksTool(server, feishuClient);
   registerCreateDocumentBlocksTool(server, feishuClient);
+  registerBitableTools(server, feishuClient);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
