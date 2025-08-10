@@ -9,5 +9,7 @@ export const FEISHU_SCOPES = [
   //   'contact:contact:readonly_as_app',
   'wiki:wiki:readonly',
   'docx:document',
-  'docx:document.block:convert'
+  'docx:document.block:convert',
+  'bitable:app',
+  
 ];
