@@ -561,3 +561,28 @@ export interface ConvertContentToBlocksResponse {
   first_level_block_ids: string[];
   blocks: ConvertedBlock[];
 }
+
+// Search Wiki types
+export interface SearchWikiRequest {
+  query: string;
+  space_id?: string;
+  node_id?: string;
+}
+
+export interface SearchWikiItem {
+  node_id: string;
+  space_id: string;
+  obj_type: number;
+  obj_token: string;
+  parent_id: string;
+  sort_id: number;
+  title: string;
+  url: string;
+  icon?: string;
+}
+
+export interface SearchWikiResponse {
+  items: SearchWikiItem[];
+  page_token?: string;
+  has_more: boolean;
+}

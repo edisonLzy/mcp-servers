@@ -7,6 +7,7 @@ import { FeishuClient } from './feishuClient.js';
 import { registerListWikiSpacesTool } from './tools/wiki/listSpaces.js';
 import { registerGetSpaceNodesTool } from './tools/wiki/getSpaceNodes.js';
 import { registerCreateWikiNodeTool } from './tools/wiki/createNode.js';
+import { registerSearchWikiTool } from './tools/wiki/searchWiki.js';
 import { registerGetDocumentBlocksTool } from './tools/docx/getDocumentBlocks.js';
 import { registerGetDocumentRawContentTool } from './tools/docx/getDocumentRawContent.js';
 import { registerUpdateDocumentBlockTool } from './tools/docx/updateDocumentBlock.js';
@@ -39,6 +40,7 @@ async function main() {
   registerListWikiSpacesTool(server, feishuClient);
   registerGetSpaceNodesTool(server, feishuClient);
   registerCreateWikiNodeTool(server, feishuClient);
+  registerSearchWikiTool(server, feishuClient);
   registerGetDocumentBlocksTool(server, feishuClient);
   registerGetDocumentRawContentTool(server, feishuClient);
   registerUpdateDocumentBlockTool(server, feishuClient);
