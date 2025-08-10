@@ -1,7 +1,7 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { readFile } from 'node:fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 export function registerGhCreateMrPrompt(server: McpServer) {
   server.prompt(
@@ -30,7 +30,7 @@ ${workflowContent}
             },
           ] 
         };
-      } catch (error) {
+      } catch {
         return { 
           messages: [
             {
