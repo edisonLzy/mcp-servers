@@ -1,142 +1,233 @@
 import { z } from 'zod';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { 
-  CreateBlockRequest
-} from '../../types/feishu.js';
+import type { CreateBlocksRequest, CreateBlocksResponse, CreateBlockRequest } from '../../types/feishu.js';
 
-// Block type constants
-const BLOCK_TYPES = {
-  PAGE: 1,
-  TEXT: 2,
-  HEADING1: 3,
-  HEADING2: 4,
-  HEADING3: 5,
-  HEADING4: 6,
-  HEADING5: 7,
-  HEADING6: 8,
-  HEADING7: 9,
-  HEADING8: 10,
-  HEADING9: 11,
-  BULLET: 12,
-  ORDERED: 13,
-  CODE: 14,
-  QUOTE: 15,
-  TODO: 17,
-  BITABLE: 18,
-  CALLOUT: 19,
-  CHAT_CARD: 20,
-  DIAGRAM: 21,
-  DIVIDER: 22,
-  FILE: 23,
-  GRID: 24,
-  GRID_COLUMN: 25,
-  IFRAME: 26,
-  IMAGE: 27,
-  ISV: 28,
-  MINDNOTE: 29,
-  SHEET: 30,
-  TABLE: 31,
-  TABLE_CELL: 32,
-  VIEW: 33
-} as const;
+// Text element schema
+const textElementStyleSchema = z.object({
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  strikethrough: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  inline_code: z.boolean().optional(),
+  background_color: z.number().optional(),
+  text_color: z.number().optional(),
+  link: z.object({
+    url: z.string(),
+  }).optional(),
+});
+
+const textElementSchema = z.object({
+  text_run: z.object({
+    content: z.string(),
+    text_element_style: textElementStyleSchema.optional(),
+  }).optional(),
+  mention_user: z.object({
+    user_id: z.string(),
+    text_element_style: textElementStyleSchema.optional(),
+  }).optional(),
+  equation: z.object({
+    content: z.string(),
+    text_element_style: textElementStyleSchema.optional(),
+  }).optional(),
+});
+
+// Block style schema
+const blockStyleSchema = z.object({
+  align: z.number().optional(),
+  folded: z.boolean().optional(),
+  background_color: z.number().optional(),
+  indent_level: z.number().optional(),
+});
+
+// Create block request schema (recursive)
+const createBlockRequestSchema: z.ZodType<any> = z.lazy(() => z.object({
+  block_type: z.number(),
+  text: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading1: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading2: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading3: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading4: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading5: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading6: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading7: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading8: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  heading9: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  bullet: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  ordered: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  code: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+    language: z.number().optional(),
+  }).optional(),
+  quote: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  todo: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  table: z.object({
+    property: z.object({
+      row_size: z.number(),
+      column_size: z.number(),
+      column_width: z.array(z.number()).optional(),
+      merge_info: z.array(z.object({
+        row_span: z.number(),
+        col_span: z.number(),
+      })).optional(),
+    }),
+    children: z.array(createBlockRequestSchema).optional(),
+  }).optional(),
+  table_cell: z.object({
+    elements: z.array(textElementSchema),
+    style: blockStyleSchema.optional(),
+  }).optional(),
+  image: z.object({
+    token: z.string(),
+    width: z.number().optional(),
+    height: z.number().optional(),
+  }).optional(),
+  file: z.object({
+    token: z.string(),
+    name: z.string().optional(),
+  }).optional(),
+  sheet: z.object({
+    token: z.string(),
+    row_size: z.number().optional(),
+    column_size: z.number().optional(),
+  }).optional(),
+  divider: z.record(z.never()).optional(),
+  equation: z.object({
+    content: z.string(),
+  }).optional(),
+  callout: z.object({
+    background_color: z.number().optional(),
+    border_color: z.number().optional(),
+    text_color: z.number().optional(),
+    emoji_id: z.string().optional(),
+    elements: z.array(textElementSchema),
+  }).optional(),
+  column: z.object({
+    columns: z.array(z.object({
+      width_ratio: z.number(),
+      children: z.array(createBlockRequestSchema).optional(),
+    })),
+  }).optional(),
+  column_set: z.object({
+    flex_mode: z.number(),
+    background_style: z.object({
+      color: z.number().optional(),
+    }).optional(),
+    children: z.array(createBlockRequestSchema).optional(),
+  }).optional(),
+}));
 
 // Schema for creating document blocks
 const createDocumentBlocksSchema = z.object({
-  document_id: z.string().describe('The document ID to create blocks in'),
-  content: z.string().describe('The content to add (supports Markdown format)'),
-  parent_block_id: z.string().optional().describe('Parent block ID (if not provided, will append to document root)'),
-  position: z.number().default(0).describe('Position index for inserting new blocks (0-based, default: append at end)'),
-  document_revision_id: z.number().default(-1).describe('Document revision ID (-1 for latest)')
+  document_id: z.string().min(1).describe('The document ID where blocks will be created'),
+  block_id: z.string().min(1).describe('The parent block ID where new blocks will be inserted'),
+  index: z.number().min(0).describe('The position index where blocks will be inserted (0-based)'),
+  blocks: z.array(createBlockRequestSchema).min(1).describe('Array of block objects to create (usually from convert-content-to-blocks tool)'),
+  document_revision_id: z.number().optional().default(-1).describe('Document revision ID for conflict detection (-1 for latest)')
 });
 
-/**
- * Create simple text block as fallback
- */
-function createSimpleTextBlock(content: string): CreateBlockRequest {
-  return {
-    block_type: BLOCK_TYPES.TEXT,
-    text: {
-      elements: [{
-        text_run: {
-          content: content.trim(),
-          text_element_style: {}
-        }
-      }]
-    }
+export interface CreateDocumentBlocksArgs {
+  document_id: string;
+  block_id: string;
+  index: number;
+  blocks: CreateBlockRequest[];
+  document_revision_id?: number;
+}
+
+export async function createDocumentBlocks(
+  client: FeishuClient,
+  args: CreateDocumentBlocksArgs
+): Promise<CreateBlocksResponse> {
+  const request: CreateBlocksRequest = {
+    index: args.index,
+    children: args.blocks
   };
+
+  return await client.createDocumentBlocks(
+    args.document_id,
+    args.block_id,
+    request,
+    args.document_revision_id || -1
+  );
 }
 
 export function registerCreateDocumentBlocksTool(server: McpServer, client: FeishuClient) {
   server.tool(
     'create-document-blocks',
-    'Create new blocks in a Feishu wiki document. Automatically converts Markdown content to structured blocks using Feishu API.',
+    'Create new blocks in a Feishu document at the specified position. This tool is typically used with blocks converted from content using the convert-content-to-blocks tool to insert structured content into documents.',
     createDocumentBlocksSchema.shape,
-    async ({
-      document_id,
-      content,
-      parent_block_id,
-      position = 0,
-      document_revision_id = -1
-    }) => {
+    async ({ document_id, block_id, index, blocks, document_revision_id }) => {
       try {
-        let blocks: any[];
-        let detectedType = 'text';
-        
-        // Detect if content is Markdown and use convertContentToBlocks API
-        const isMarkdown = /^#{1,6}\s|^[-*+]\s|^\d+\.\s|^```|^>\s|^-\s*\[[ x]\]\s/.test(content.trim());
-        
-        if (isMarkdown) {
-          detectedType = 'markdown';
-          const convertRequest = {
-            content_type: 'markdown' as const,
-            content
-          };
-          
-          const convertResult = await client.convertContentToBlocks(convertRequest);
-          blocks = convertResult.blocks || [];
-        } else {
-          // Fallback for simple text content
-          blocks = [createSimpleTextBlock(content)];
-        }
-        
-        // Determine parent block ID
-        let parentId = parent_block_id;
-        if (!parentId) {
-          // Get document blocks to find root
-          const documentBlocks = await client.getDocumentBlocks(document_id);
-          if (documentBlocks.items.length > 0) {
-            parentId = documentBlocks.items[0].block_id; // Use first block as parent (usually page block)
-          } else {
-            throw new Error('Document has no blocks to use as parent');
-          }
-        }
-        
-        const createRequest = {
-          index: position,
-          children: blocks
-        };
-        
-        const result = await client.createDocumentBlocks(document_id, parentId, createRequest, document_revision_id);
+        const result = await createDocumentBlocks(client, {
+          document_id,
+          block_id,
+          index,
+          blocks,
+          document_revision_id
+        });
         
         return {
           content: [{
             type: 'text',
             text: JSON.stringify({
               success: true,
-              operation: 'create',
+              operation: 'create-document-blocks',
               document_id,
-              detected_content_type: detectedType,
-              created_blocks: result.children.map((block: any) => ({
+              parent_block_id: block_id,
+              insertion_index: index,
+              created_blocks_count: result.children.length,
+              document_revision_id: result.document_revision_id,
+              created_blocks: result.children.map(block => ({
                 block_id: block.block_id,
                 block_type: block.block_type,
                 parent_id: block.parent_id
-              })),
-              document_revision_id: result.document_revision_id
+              }))
             }, null, 2)
           }]
         };
-        
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         
@@ -146,8 +237,9 @@ export function registerCreateDocumentBlocksTool(server: McpServer, client: Feis
             text: JSON.stringify({
               success: false,
               error: errorMessage,
-              operation: 'create',
-              document_id
+              operation: 'create-document-blocks',
+              document_id,
+              parent_block_id: block_id
             }, null, 2)
           }]
         };

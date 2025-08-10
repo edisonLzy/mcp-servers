@@ -23,6 +23,12 @@ A Model Context Protocol (MCP) server for integrating with Feishu/Lark Wiki and 
 - `create-document`: Create new Feishu documents
 - `get-document-content`: Retrieve document content (rich or plain text)
 - `update-document`: Update document content
+- `get-document-blocks`: Get structured blocks from a document
+- `get-document-raw-content`: Get raw document content
+- `update-document-block`: Update a specific document block
+- `delete-document-blocks`: Delete document blocks
+- `convert-content-to-blocks`: Convert Markdown/HTML content to Feishu blocks
+- `create-document-blocks`: Create new blocks in a document from converted content
 
 ## Installation
 
