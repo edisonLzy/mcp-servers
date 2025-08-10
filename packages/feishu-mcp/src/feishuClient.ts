@@ -20,7 +20,9 @@ import type {
   DeleteBlocksRequest,
   DeleteBlocksResponse,
   ConvertContentToBlocksRequest,
-  ConvertContentToBlocksResponse
+  ConvertContentToBlocksResponse,
+  SearchWikiRequest,
+  SearchWikiResponse
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -345,6 +347,32 @@ export class FeishuClient {
 
     const response = await this.httpClient.post<ConvertContentResponse>(
       'docx/v1/documents/blocks/convert',
+      data,
+      { headers }
+    );
+
+    return response.data.data;
+  }
+
+  async searchWiki(data: SearchWikiRequest, pageToken?: string, pageSize?: number): Promise<SearchWikiResponse> {
+    const headers = await this.getAuthHeaders();
+    
+    interface SearchWikiApiResponse extends FeishuResponse {
+      data: SearchWikiResponse;
+    }
+
+    const params = new URLSearchParams();
+    if (pageToken) {
+      params.append('page_token', pageToken);
+    }
+    if (pageSize) {
+      params.append('page_size', pageSize.toString());
+    }
+
+    const url = `wiki/v1/nodes/search${params.toString() ? '?' + params.toString() : ''}`;
+    
+    const response = await this.httpClient.post<SearchWikiApiResponse>(
+      url,
       data,
       { headers }
     );

@@ -17,6 +17,7 @@ A Model Context Protocol (MCP) server for integrating with Feishu/Lark Wiki and 
 - `list-wiki-spaces`: Get all accessible wiki spaces
 - `get-space-nodes`: Get documents in a wiki space (with recursive option)
 - `create-wiki-node`: Create new nodes in wiki spaces
+- `search-wiki`: Search Wiki documents by keyword (supports filtering by space and node)
 
 ### Document Tools
 
