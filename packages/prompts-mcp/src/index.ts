@@ -4,6 +4,7 @@ import { registerGhCreateMrPrompt } from './prompts/gh-create-mr.js';
 import { registerGhCodeReviewPrompt } from './prompts/gh-code-review.js';
 import { registerGhAutoMrFlowPrompt } from './prompts/gh-auto-mr-flow.js';
 import { registerGitWorktreeDevelopmentPrompt } from './prompts/git-worktree-development.js';
+import { registerGitCommitWorkflowPrompt } from './prompts/git-commit-workflow.js';
 
 async function main() {
   // Create an MCP server
@@ -24,6 +25,7 @@ async function main() {
   registerGhCodeReviewPrompt(server);
   registerGhAutoMrFlowPrompt(server);
   registerGitWorktreeDevelopmentPrompt(server);
+  registerGitCommitWorkflowPrompt(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
