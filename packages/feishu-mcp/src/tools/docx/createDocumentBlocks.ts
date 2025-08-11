@@ -163,6 +163,7 @@ const createBlockRequestSchema: z.ZodType<any> = z.lazy(() => z.object({
 // Schema for creating document blocks
 const createDocumentBlocksSchema = z.object({
   document_id: z.string().min(1).describe('The document ID where blocks will be created'),
+  // TODO: 默认为 document_id
   block_id: z.string().min(1).describe('The parent block ID where new blocks will be inserted'),
   index: z.number().min(0).describe('The position index where blocks will be inserted (0-based)'),
   blocks: z.array(createBlockRequestSchema).min(1).describe('Array of block objects to create (usually from convert-content-to-blocks tool)'),
