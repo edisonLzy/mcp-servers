@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -17,7 +18,7 @@ export function registerListBitableFieldsTool(server: McpServer, client: FeishuC
     '列出多维表格数据表中的所有字段',
     listBitableFieldsSchema.shape,
     async ({ app_token, table_id, view_id, text_field_as_array, page_token, page_size }) => {
-      try {
+      return runWithExceptionHandler(async () => {
         const response = await client.listBitableFields(
           app_token,
           table_id,
@@ -52,21 +53,7 @@ export function registerListBitableFieldsTool(server: McpServer, client: FeishuC
             }, null, 2)
           }]
         };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to list bitable fields',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+      });
     }
   );
 }

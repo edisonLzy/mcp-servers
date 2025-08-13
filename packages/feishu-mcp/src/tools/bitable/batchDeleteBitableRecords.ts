@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -18,7 +19,7 @@ export function registerBatchDeleteBitableRecordsTool(server: McpServer, client:
       table_id,
       record_ids
     }) => {
-      try {
+      return runWithExceptionHandler(async () => {
         const response = await client.batchDeleteBitableRecords(
           app_token,
           table_id,
@@ -38,21 +39,7 @@ export function registerBatchDeleteBitableRecordsTool(server: McpServer, client:
             }, null, 2)
           }]
         };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to batch delete bitable records',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+      });
     }
   );
 }

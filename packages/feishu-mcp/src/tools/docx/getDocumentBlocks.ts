@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { DocumentBlock } from '../../types/feishu.js';
@@ -28,40 +29,28 @@ export function registerGetDocumentBlocksTool(server: McpServer, client: FeishuC
     'Get the structured blocks of a Feishu knowledge base document by document ID',
     getDocumentBlocksSchema.shape,
     async ({ document_id, include_children = true }) => {
-      try {
-        // Get all blocks from the document
-        const blocks = await getAllBlocks(client, document_id);
-        
-        // Return structured block data
-        const processedBlocks = include_children ? blocks : blocks.filter(block => !block.parent_id);
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              document_id,
-              blocks: processedBlocks,
-              block_count: processedBlocks.length,
-              total_blocks: blocks.length
-            }, null, 2)
-          }]
-        };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                code: error.code || 'UNKNOWN_ERROR',
-                message: error.message || 'Failed to get document blocks'
-              }
-            }, null, 2)
-          }],
-          isError: true
-        };
-      }
+      return runWithExceptionHandler(
+        async () => {
+          // Get all blocks from the document
+          const blocks = await getAllBlocks(client, document_id);
+          
+          // Return structured block data
+          const processedBlocks = include_children ? blocks : blocks.filter(block => !block.parent_id);
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                document_id,
+                blocks: processedBlocks,
+                block_count: processedBlocks.length,
+                total_blocks: blocks.length
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

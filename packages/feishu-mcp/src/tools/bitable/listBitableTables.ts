@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -14,43 +15,35 @@ export function registerListBitableTablesTool(server: McpServer, client: FeishuC
     'List all tables in a Feishu bitable (multi-dimensional table)',
     listBitableTablesSchema.shape,
     async ({ app_token, page_token, page_size }) => {
-      try {
-        const response = await client.listBitableTables(
-          app_token,
-          page_token,
-          page_size
-        );
-        
-        const tables = response.items.map(table => ({
-          table_id: table.table_id,
-          name: table.name,
-          revision: table.revision
-        }));
+      return runWithExceptionHandler(
+        async () => {
+          const response = await client.listBitableTables(
+            app_token,
+            page_token,
+            page_size
+          );
+          
+          const tables = response.items.map(table => ({
+            table_id: table.table_id,
+            name: table.name,
+            revision: table.revision
+          }));
 
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              app_token,
-              tables,
-              total: response.total,
-              has_more: response.has_more,
-              page_token: response.page_token
-            }, null, 2)
-          }]
-        };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: `Failed to list bitable tables: ${error.message}`
-            }, null, 2)
-          }]
-        };
-      }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                items: tables,
+                total: tables.length,
+                app_token,
+                page_token: response.page_token,
+                has_more: response.has_more
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

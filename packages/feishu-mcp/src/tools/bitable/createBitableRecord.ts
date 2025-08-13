@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -22,45 +23,33 @@ export function registerCreateBitableRecordTool(server: McpServer, client: Feish
       user_id_type,
       client_token
     }) => {
-      try {
-        const response = await client.createBitableRecord(
-          app_token,
-          table_id,
-          { fields },
-          user_id_type,
-          client_token
-        );
+      return runWithExceptionHandler(
+        async () => {
+          const response = await client.createBitableRecord(
+            app_token,
+            table_id,
+            { fields },
+            user_id_type,
+            client_token
+          );
 
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              app_token,
-              table_id,
-              record: response.record,
-              request_params: {
-                user_id_type,
-                client_token
-              }
-            }, null, 2)
-          }]
-        };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to create bitable record',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                app_token,
+                table_id,
+                record: response.record,
+                request_params: {
+                  user_id_type,
+                  client_token
+                }
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

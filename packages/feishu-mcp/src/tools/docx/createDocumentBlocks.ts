@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CreateBlocksRequest, CreateBlocksResponse, CreateBlockRequest } from '../../types/feishu.js';
@@ -163,7 +164,7 @@ const createBlockRequestSchema: z.ZodType<any> = z.lazy(() => z.object({
 // Schema for creating document blocks
 const createDocumentBlocksSchema = z.object({
   document_id: z.string().min(1).describe('The document ID where blocks will be created'),
-  block_id: z.string().min(1).describe('The parent block ID where new blocks will be inserted'),
+  block_id: z.string().min(1).optional().describe('The parent block ID where new blocks will be inserted. If not provided, will use document_id to create blocks at document root level'),
   index: z.number().min(0).describe('The position index where blocks will be inserted (0-based)'),
   blocks: z.array(createBlockRequestSchema).min(1).describe('Array of block objects to create (usually from convert-content-to-blocks tool)'),
   document_revision_id: z.number().optional().default(-1).describe('Document revision ID for conflict detection (-1 for latest)')
@@ -171,7 +172,7 @@ const createDocumentBlocksSchema = z.object({
 
 export interface CreateDocumentBlocksArgs {
   document_id: string;
-  block_id: string;
+  block_id?: string;
   index: number;
   blocks: CreateBlockRequest[];
   document_revision_id?: number;
@@ -186,9 +187,12 @@ export async function createDocumentBlocks(
     children: args.blocks
   };
 
+  // Use document_id as block_id if not provided (create at document root level)
+  const targetBlockId = args.block_id || args.document_id;
+
   return await client.createDocumentBlocks(
     args.document_id,
-    args.block_id,
+    targetBlockId,
     request,
     args.document_revision_id || -1
   );
@@ -200,50 +204,41 @@ export function registerCreateDocumentBlocksTool(server: McpServer, client: Feis
     'Create new blocks in a Feishu document at the specified position. This tool is typically used with blocks converted from content using the convert-content-to-blocks tool to insert structured content into documents.',
     createDocumentBlocksSchema.shape,
     async ({ document_id, block_id, index, blocks, document_revision_id }) => {
-      try {
-        const result = await createDocumentBlocks(client, {
-          document_id,
-          block_id,
-          index,
-          blocks,
-          document_revision_id
-        });
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              operation: 'create-document-blocks',
-              document_id,
-              parent_block_id: block_id,
-              insertion_index: index,
-              created_blocks_count: result.children.length,
-              document_revision_id: result.document_revision_id,
-              created_blocks: result.children.map(block => ({
-                block_id: block.block_id,
-                block_type: block.block_type,
-                parent_id: block.parent_id
-              }))
-            }, null, 2)
-          }]
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: errorMessage,
-              operation: 'create-document-blocks',
-              document_id,
-              parent_block_id: block_id
-            }, null, 2)
-          }]
-        };
-      }
+      return runWithExceptionHandler(
+        async () => {
+          // Use document_id as block_id if not provided (create at document root level)
+          const targetBlockId = block_id || document_id;
+          
+          const result = await createDocumentBlocks(client, {
+            document_id,
+            block_id: targetBlockId,
+            index,
+            blocks,
+            document_revision_id
+          });
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                operation: 'create-document-blocks',
+                document_id,
+                parent_block_id: targetBlockId,
+                insertion_index: index,
+                created_blocks_count: result.children.length,
+                document_revision_id: result.document_revision_id,
+                created_at_root: !block_id,
+                created_blocks: result.children.map(block => ({
+                  block_id: block.block_id,
+                  block_type: block.block_type,
+                  parent_id: block.parent_id
+                }))
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

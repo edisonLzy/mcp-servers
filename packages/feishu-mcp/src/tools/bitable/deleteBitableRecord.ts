@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -18,40 +19,28 @@ export function registerDeleteBitableRecordTool(server: McpServer, client: Feish
       table_id,
       record_id
     }) => {
-      try {
-        const response = await client.deleteBitableRecord(
-          app_token,
-          table_id,
-          record_id
-        );
+      return runWithExceptionHandler(
+        async () => {
+          const response = await client.deleteBitableRecord(
+            app_token,
+            table_id,
+            record_id
+          );
 
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              app_token,
-              table_id,
-              record_id,
-              deleted: response.data.deleted
-            }, null, 2)
-          }]
-        };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to delete bitable record',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                app_token,
+                table_id,
+                record_id,
+                deleted: response.data.deleted
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

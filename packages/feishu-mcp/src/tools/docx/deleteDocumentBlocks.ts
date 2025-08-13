@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -28,45 +29,31 @@ export function registerDeleteDocumentBlocksTool(server: McpServer, client: Feis
       end_index: number;
       document_revision_id?: number;
     }) => {
-      try {
-        const deleteRequest = {
-          start_index,
-          end_index
-        };
-        
-        const result = await client.deleteDocumentBlocks(document_id, parent_block_id, deleteRequest, document_revision_id);
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              operation: 'delete',
-              document_id,
-              parent_block_id,
-              deleted_range: `${start_index}-${end_index}`,
-              deleted_count: end_index - start_index,
-              document_revision_id: result.document_revision_id
-            }, null, 2)
-          }]
-        };
-        
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: errorMessage,
-              operation: 'delete',
-              document_id,
-              parent_block_id
-            }, null, 2)
-          }]
-        };
-      }
+      return runWithExceptionHandler(
+        async () => {
+          const deleteRequest = {
+            start_index,
+            end_index
+          };
+          
+          const result = await client.deleteDocumentBlocks(document_id, parent_block_id, deleteRequest, document_revision_id);
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                operation: 'delete',
+                document_id,
+                parent_block_id,
+                deleted_range: `${start_index}-${end_index}`,
+                deleted_count: end_index - start_index,
+                document_revision_id: result.document_revision_id
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }
