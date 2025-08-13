@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CreateBlocksRequest, CreateBlocksResponse, CreateBlockRequest } from '../../types/feishu.js';
@@ -203,54 +204,41 @@ export function registerCreateDocumentBlocksTool(server: McpServer, client: Feis
     'Create new blocks in a Feishu document at the specified position. This tool is typically used with blocks converted from content using the convert-content-to-blocks tool to insert structured content into documents.',
     createDocumentBlocksSchema.shape,
     async ({ document_id, block_id, index, blocks, document_revision_id }) => {
-      try {
-        // Use document_id as block_id if not provided (create at document root level)
-        const targetBlockId = block_id || document_id;
-        
-        const result = await createDocumentBlocks(client, {
-          document_id,
-          block_id: targetBlockId,
-          index,
-          blocks,
-          document_revision_id
-        });
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              operation: 'create-document-blocks',
-              document_id,
-              parent_block_id: targetBlockId,
-              insertion_index: index,
-              created_blocks_count: result.children.length,
-              document_revision_id: result.document_revision_id,
-              created_at_root: !block_id, // Indicates if blocks were created at document root
-              created_blocks: result.children.map(block => ({
-                block_id: block.block_id,
-                block_type: block.block_type,
-                parent_id: block.parent_id
-              }))
-            }, null, 2)
-          }]
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: errorMessage,
-              operation: 'create-document-blocks',
-              document_id,
-              parent_block_id: block_id || document_id
-            }, null, 2)
-          }]
-        };
-      }
+      return runWithExceptionHandler(
+        async () => {
+          // Use document_id as block_id if not provided (create at document root level)
+          const targetBlockId = block_id || document_id;
+          
+          const result = await createDocumentBlocks(client, {
+            document_id,
+            block_id: targetBlockId,
+            index,
+            blocks,
+            document_revision_id
+          });
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                operation: 'create-document-blocks',
+                document_id,
+                parent_block_id: targetBlockId,
+                insertion_index: index,
+                created_blocks_count: result.children.length,
+                document_revision_id: result.document_revision_id,
+                created_at_root: !block_id,
+                created_blocks: result.children.map(block => ({
+                  block_id: block.block_id,
+                  block_type: block.block_type,
+                  parent_id: block.parent_id
+                }))
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }

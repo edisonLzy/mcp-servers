@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -36,7 +37,7 @@ export function registerGetBitableRecordsTool(server: McpServer, client: FeishuC
       filter_operator,
       filter_value
     }) => {
-      try {
+      return runWithExceptionHandler(async () => {
         // Build request data
         const requestData: any = {
           automatic_fields: include_automatic_fields
@@ -99,21 +100,7 @@ export function registerGetBitableRecordsTool(server: McpServer, client: FeishuC
             }, null, 2)
           }]
         };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to get bitable records',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+      });
     }
   );
 }

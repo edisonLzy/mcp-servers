@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runWithExceptionHandler } from '../../utils/errorHandler.js';
 import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -22,45 +23,30 @@ export function registerUpdateBitableRecordTool(server: McpServer, client: Feish
       fields,
       user_id_type
     }) => {
-      try {
-        const response = await client.updateBitableRecord(
-          app_token,
-          table_id,
-          record_id,
-          { fields },
-          user_id_type
-        );
+      return runWithExceptionHandler(
+        async () => {
+          const response = await client.updateBitableRecord(
+            app_token,
+            table_id,
+            record_id,
+            { fields },
+            user_id_type
+          );
 
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: true,
-              app_token,
-              table_id,
-              record_id,
-              record: response.record,
-              request_params: {
-                user_id_type
-              }
-            }, null, 2)
-          }]
-        };
-      } catch (error: any) {
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message || 'Failed to update bitable record',
-                code: error.code || 'UNKNOWN_ERROR',
-                details: error.details || error
-              }
-            }, null, 2)
-          }]
-        };
-      }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                app_token,
+                table_id,
+                record_id,
+                record: response.record
+              }, null, 2)
+            }]
+          };
+        }
+      );
     }
   );
 }
