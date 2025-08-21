@@ -7,7 +7,7 @@ import { checkExistingCredentials, loginCommand } from './login';
 
 export const installCommand = createInstallCommand({
   name: 'feishu-mcp',
-  entryPath: path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'index.ts'),
+  entryPath: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'index.ts'),
   beforeInstall: async (options) => {
     console.log('🔧 Installing Feishu MCP Server...');
     console.log(`Client: ${options.client}, Global: ${options.global}`);
