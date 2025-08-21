@@ -42,17 +42,49 @@ async function runFigmaMCP(): Promise<void> {
 }
 
 async function authFigmaMCP(): Promise<void> {
-  const { Command } = await import('commander');
-  const { cliAction } = await import('./cli.js');
+  const inquirer = await import('inquirer');
   
-  // Run the CLI auth setup
-  const program = new Command();
-  program
-    .name('figma-mcp-auth')
-    .description('Configure Figma MCP authentication')
-    .action(cliAction);
+  const figmaClient = new FigmaClient();
   
-  await program.parseAsync(['node', 'figma-mcp-auth']);
+  console.log('Welcome to Figma MCP Server setup!');
+  console.log('To get your Figma Personal Access Token:');
+  console.log('1. Go to https://www.figma.com/developers/api#access-tokens');
+  console.log('2. Click "Generate new token"');
+  console.log('3. Copy your personal access token\n');
+
+  const { token } = await inquirer.prompt([
+    {
+      type: 'password',
+      name: 'token',
+      message: 'Enter your Figma Personal Access Token:',
+      validate: (input: string) => {
+        if (!input.trim()) {
+          return 'Token is required';
+        }
+        if (!input.startsWith('figd_')) {
+          return 'Figma tokens should start with "figd_"';
+        }
+        return true;
+      },
+    },
+  ]);
+
+  const config = {
+    personalAccessToken: token.trim(),
+  };
+
+  await figmaClient.setConfig(config);
+  
+  // Test the token
+  try {
+    const user = await figmaClient.getCurrentUser();
+    console.log('\n✅ Authentication successful!');
+    console.log(`Hello, ${user.handle} (${user.email})`);
+  } catch {
+    console.log('\n❌ Authentication failed. Please check your token.');
+    await figmaClient.clearConfig();
+    process.exit(1);
+  }
 }
 
 const figmaMCPServer: MCPServerOptions = {

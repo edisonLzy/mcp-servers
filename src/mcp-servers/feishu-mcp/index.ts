@@ -58,9 +58,16 @@ async function runFeishuMCP(): Promise<void> {
 }
 
 async function authFeishuMCP(): Promise<void> {
-  // Import and run CLI auth command
-  const { loginAction } = await import('./commands/login.js');
-  await loginAction();
+  console.log('🔧 Feishu MCP 认证配置');
+  console.log('请前往飞书开放平台配置应用并获取 App ID 和 App Secret');
+  console.log('https://open.feishu.cn/app');
+  console.log('');
+  console.log('需要配置的环境变量:');
+  console.log('- FEISHU_APP_ID=your_app_id');
+  console.log('- FEISHU_APP_SECRET=your_app_secret');
+  console.log('');
+  console.log('或者运行原有的认证流程:');
+  console.log('feishu-mcp login');
 }
 
 const feishuMCPServer: MCPServerOptions = {

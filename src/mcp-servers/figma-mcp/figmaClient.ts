@@ -1,4 +1,4 @@
-import { ConfigStore } from './auth/configStore.js';
+import { ConfigStore } from '../../config-store.js';
 import type {
   FigmaConfig,
   FileResponse,
@@ -19,14 +19,14 @@ export class FigmaClient {
   private configStore: ConfigStore;
 
   constructor(config?: Partial<FigmaConfig>) {
-    this.configStore = ConfigStore.create();
+    this.configStore = ConfigStore.get();
     
     this.baseURL = config?.baseURL || this.baseURL;
   }
 
   private async initializeFromStoredConfig(): Promise<void> {
     try {
-      const storedConfig = await this.configStore.getConfig();
+      const storedConfig = await this.configStore.getConfig<FigmaConfig>('figma-mcp');
       if (storedConfig) {
         this.personalAccessToken = this.personalAccessToken || storedConfig.personalAccessToken;
         this.baseURL = this.baseURL || storedConfig.baseURL || 'https://api.figma.com/v1';
@@ -151,20 +151,20 @@ export class FigmaClient {
     this.personalAccessToken = config.personalAccessToken;
     this.baseURL = config.baseURL || 'https://api.figma.com/v1';
     
-    await this.configStore.saveConfig({
+    await this.configStore.setConfig('figma-mcp', {
       personalAccessToken: this.personalAccessToken,
       baseURL: this.baseURL,
     });
   }
 
   async getConfig(): Promise<FigmaConfig | null> {
-    return this.configStore.getConfig();
+    return this.configStore.getConfig<FigmaConfig>('figma-mcp');
   }
 
   async clearConfig(): Promise<void> {
     this.personalAccessToken = '';
     this.baseURL = 'https://api.figma.com/v1';
-    await this.configStore.clearConfig();
+    await this.configStore.clearConfig('figma-mcp');
   }
 
   isConfigured(): boolean {
