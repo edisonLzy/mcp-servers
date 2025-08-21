@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import dotenv from 'dotenv';
@@ -11,10 +9,11 @@ import { registerGetNodeTool } from './tools/nodes/getNode.js';
 import { registerGetNodesTool } from './tools/nodes/getNodes.js';
 import { registerListTeamsTool } from './tools/teams/listTeams.js';
 import { registerListProjectsTool } from './tools/teams/listProjects.js';
+import type { MCPServerOptions } from '../../types.js';
 
 dotenv.config();
 
-async function main() {
+async function runFigmaMCP(): Promise<void> {
   // Create an MCP server
   const server = new McpServer({
     name: 'figma-mcp',
@@ -42,7 +41,26 @@ async function main() {
   console.error('Figma MCP Server started successfully! Use the available tools to interact with Figma files and nodes.');
 }
 
-main().catch((error) => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+async function authFigmaMCP(): Promise<void> {
+  const { Command } = await import('commander');
+  const { cliAction } = await import('./cli.js');
+  
+  // Run the CLI auth setup
+  const program = new Command();
+  program
+    .name('figma-mcp-auth')
+    .description('Configure Figma MCP authentication')
+    .action(cliAction);
+  
+  await program.parseAsync(['node', 'figma-mcp-auth']);
+}
+
+const figmaMCPServer: MCPServerOptions = {
+  name: 'figma-mcp',
+  description: 'Figma integration for files, nodes and team management',
+  run: runFigmaMCP,
+  auth: authFigmaMCP,
+  requiresAuth: true
+};
+
+export default figmaMCPServer;

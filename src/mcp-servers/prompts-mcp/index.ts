@@ -5,8 +5,9 @@ import { registerGhCodeReviewPrompt } from './prompts/gh-code-review.js';
 import { registerGhAutoMrFlowPrompt } from './prompts/gh-auto-mr-flow.js';
 import { registerGitWorktreeDevelopmentPrompt } from './prompts/git-worktree-development.js';
 import { registerGitCommitWorkflowPrompt } from './prompts/git-commit-workflow.js';
+import type { MCPServerOptions } from '../../types.js';
 
-async function main() {
+async function runPromptsMCP(): Promise<void> {
   // Create an MCP server
   const server = new McpServer(
     {
@@ -32,4 +33,11 @@ async function main() {
   await server.connect(transport);
 }
 
-main().catch(console.error); 
+const promptsMCPServer: MCPServerOptions = {
+  name: 'prompts-mcp',
+  description: 'Git and GitHub workflow prompts for development',
+  run: runPromptsMCP,
+  requiresAuth: false
+};
+
+export default promptsMCPServer; 

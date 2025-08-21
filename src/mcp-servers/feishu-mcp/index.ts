@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import dotenv from 'dotenv';
@@ -17,10 +15,11 @@ import { registerConvertContentToBlocksTool } from './tools/docx/convertContentT
 import { registerCreateDocumentBlocksTool } from './tools/docx/createDocumentBlocks.js';
 import { registerBitableTools } from './tools/bitable/index.js';
 import { TokenStore } from './auth/tokenStore.js';
+import type { MCPServerOptions } from '../../types.js';
 
 dotenv.config();
 
-async function main() {
+async function runFeishuMCP(): Promise<void> {
   // Create an MCP server
   const server = new McpServer({
     name: 'feishu-mcp',
@@ -58,5 +57,18 @@ async function main() {
   console.error('Feishu MCP Server started');
 }
 
-// Start the server
-main().catch(console.error);
+async function authFeishuMCP(): Promise<void> {
+  // Import and run CLI auth command
+  const { loginAction } = await import('./commands/login.js');
+  await loginAction();
+}
+
+const feishuMCPServer: MCPServerOptions = {
+  name: 'feishu-mcp',
+  description: 'Feishu/Lark integration with OAuth and CLI',
+  run: runFeishuMCP,
+  auth: authFeishuMCP,
+  requiresAuth: true
+};
+
+export default feishuMCPServer;
