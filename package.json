@@ -1,5 +1,5 @@
 {
-  "name": "mcp-servers",
+  "name": "@codemons/mcp-servers",
   "version": "0.1.0",
   "description": "Unified MCP Servers CLI",
   "license": "MIT",
