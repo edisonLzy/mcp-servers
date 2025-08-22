@@ -27,7 +27,7 @@ export class ConfigStore {
   static get(): ConfigStore {
     return new ConfigStore({
       configFileName: 'config.json',
-      storageDir: path.join(os.homedir(), '.mcp-servers')
+      storageDir: path.join(os.homedir(), '.codemons', 'mcp-servers')
     });
   }
 
