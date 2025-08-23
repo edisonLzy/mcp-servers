@@ -1,46 +1,26 @@
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import { ConfigStore } from '../../../config-store.js';
 import type { TokenInfo, StoredTokenData } from './types.js';
 
-const TOKEN_STORAGE_FILE = 'tokens.json';
-const STORAGE_DIR = path.join(os.homedir(), '.feishu-mcp');
+const CONFIG_KEY = 'feishu-mcp-tokens';
 
 export class TokenStore {
-  private storageDir: string;
-  private storageFile: string;
+  private configStore: ConfigStore;
   private cache: StoredTokenData | null = null;
   private initialized = false;
 
   constructor() {
-    this.storageDir = STORAGE_DIR;
-    this.storageFile = path.join(this.storageDir, TOKEN_STORAGE_FILE);
+    this.configStore = ConfigStore.get();
   }
 
   static create(): TokenStore {
     return new TokenStore();     
   }
 
-  private ensureStorageDir(): void {
-    if (!fs.existsSync(this.storageDir)) {
-      fs.mkdirSync(this.storageDir, { recursive: true, mode: 0o700 }); // Only user can access
-    }
-  }
-
   private async ensureInitialized(): Promise<void> {
     if (this.initialized) return;
     
     try {
-      this.ensureStorageDir();
-      
-      if (fs.existsSync(this.storageFile)) {
-        const data = fs.readFileSync(this.storageFile, 'utf8');
-        const parsed = JSON.parse(data);
-        this.cache = parsed || null;
-      } else {
-        this.cache = null;
-      }
-      
+      this.cache = await this.configStore.getConfig<StoredTokenData>(CONFIG_KEY);
       await this.clearExpiredTokens();
       this.initialized = true;
     } catch (error) {
@@ -52,14 +32,7 @@ export class TokenStore {
 
   private async saveToStorage(): Promise<void> {
     try {
-      this.ensureStorageDir();
-      
-      const jsonData = JSON.stringify(this.cache, null, 2);
-      
-      // Write to temp file first, then rename for atomic operation
-      const tempFile = this.storageFile + '.tmp';
-      fs.writeFileSync(tempFile, jsonData, { mode: 0o600 }); // Only user can read/write
-      fs.renameSync(tempFile, this.storageFile);
+      await this.configStore.setConfig(CONFIG_KEY, this.cache);
     } catch (error) {
       console.error('Failed to save tokens:', error);
       throw error;
@@ -148,11 +121,7 @@ export class TokenStore {
    * Get storage directory for debugging purposes
    */
   getStorageInfo(): { path: string; exists: boolean; readable: boolean } {
-    return {
-      path: this.storageFile,
-      exists: fs.existsSync(this.storageFile),
-      readable: fs.existsSync(this.storageFile) && fs.statSync(this.storageFile).isFile()
-    };
+    return this.configStore.getStorageInfo();
   }
 
   /**
