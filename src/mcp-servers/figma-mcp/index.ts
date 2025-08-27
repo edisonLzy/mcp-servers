@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import dotenv from 'dotenv';
+import inquirer from 'inquirer';
 import { FigmaClient } from './figmaClient.js';
 // Import tool registrations
 import { registerGetFileTool } from './tools/files/getFile.js';
@@ -42,7 +43,6 @@ async function runFigmaMCP(): Promise<void> {
 }
 
 async function authFigmaMCP(): Promise<void> {
-  const inquirer = await import('inquirer');
   
   const figmaClient = new FigmaClient();
   
