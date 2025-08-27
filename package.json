@@ -1,18 +1,51 @@
 {
-  "name": "mcp-servers",
-  "version": "0.0.1",
-  "private": true,
-  "description": "MCP Servers",
+  "name": "@codemons/mcp-servers",
+  "version": "0.1.0",
+  "description": "Unified MCP Servers CLI",
   "license": "MIT",
-  "author": "",
+  "author": "MCP Servers Team",
   "type": "module",
+  "bin": {
+    "codemons-mcp": "src/cli.ts"
+  },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "prepare": "husky",
-    "commit-msg": "commitlint --edit"
+    "commit-msg": "commitlint --edit",
+    "postinstall": "pnpm link --global",
+    "dev:cli": "tsx src/cli.ts",
+    "release:dry-run": "tsx scripts/release.ts --dry-run",
+    "release:check": "tsx scripts/release.ts --check",
+    "release:publish": "tsx scripts/release.ts --publish"
+  },
+  "keywords": [
+    "mcp",
+    "servers",
+    "cli",
+    "feishu",
+    "figma",
+    "prompts",
+    "typescript"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/inspector": "^0.16.5",
+    "@modelcontextprotocol/sdk": "^1.17.1",
+    "axios": "^1.6.0",
+    "commander": "^14.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.0",
+    "fs-extra": "^11.3.0",
+    "inquirer": "^10.0.0",
+    "log-symbols": "^7.0.1",
+    "picocolors": "^1.1.1",
+    "simple-git": "^3.28.0",
+    "zod": "^3.25.42"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
@@ -21,6 +54,9 @@
     "@eslint/js": "^9.23.0",
     "@stylistic/eslint-plugin": "^4.2.0",
     "@swc/core": "^1.11.11",
+    "@types/express": "^4.17.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
     "@types/node": "^20.17.25",
     "eslint": "^9.23.0",
     "eslint-plugin-import": "^2.31.0",
@@ -36,14 +72,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "pnpm@10.7.0+sha512.6b865ad4b62a1d9842b61d674a393903b871d9244954f652b8842c2b553c72176b278f64c463e52d40fff8aba385c235c8c9ecf5cc7de4fd78b8bb6d49633ab6",
-  "pnpm": {
-    "overrides": {
-      "@mcp-servers/core": "link:packages/core"
-    }
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
-  "dependencies": {
-    "@mcp-servers/core": "link:packages/core",
-    "dotenv": "^16.5.0"
-  }
+  "packageManager": "pnpm@10.7.0+sha512.6b865ad4b62a1d9842b61d674a393903b871d9244954f652b8842c2b553c72176b278f64c463e52d40fff8aba385c235c8c9ecf5cc7de4fd78b8bb6d49633ab6"
 }
