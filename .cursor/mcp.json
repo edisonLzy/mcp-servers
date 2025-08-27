@@ -9,9 +9,23 @@
       ]
     },
     "feishu-mcp": {
-      "command": "tsx",
+      "command": "codemons-mcp",
       "args": [
-        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/feishu-mcp/src/index.ts"
+        "feishu-mcp"
+      ],
+      "type": "stdio"
+    },
+    "figma-mcp": {
+      "command": "codemons-mcp",
+      "args": [
+        "figma-mcp"
+      ],
+      "type": "stdio"
+    },
+    "prompts-mcp": {
+      "command": "codemons-mcp",
+      "args": [
+        "prompts-mcp"
       ],
       "type": "stdio"
     }

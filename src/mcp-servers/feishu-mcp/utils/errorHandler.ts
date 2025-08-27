@@ -1,4 +1,4 @@
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.d.ts';
 import type { FeishuError } from '../types/feishu';
 
 type CallToolFailureResult = CallToolResult & {

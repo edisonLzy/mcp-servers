@@ -22,9 +22,14 @@ export function registerListWikiSpacesTool(server: McpServer, client: FeishuClie
           }));
 
           return {
-            success: true,
-            items: spaces,
-            total: spaces.length
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                items: spaces,
+                total: spaces.length
+              }, null, 2)
+            }]
           };
         }
       );

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { FEISHU_API_BASE_URL } from './constant.js';
-import type { TokenStore } from './auth/tokenStore.js';
+import { getTokenInfoFromStore, saveTokenInfoToStore } from './auth/tokenStore.js';
+import { OAuthServer } from './auth/oauthServer.js';
 import type { 
   FeishuResponse, 
   FeishuError,
@@ -40,8 +41,13 @@ import type { AxiosInstance, AxiosError } from 'axios';
 
 export class FeishuClient {
   private httpClient: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (value?: any) => void;
+    reject: (reason?: any) => void;
+  }> = [];
 
-  constructor(private tokenStore: TokenStore) {
+  constructor() {
 
     this.httpClient = axios.create({
       baseURL: `${FEISHU_API_BASE_URL}/open-apis`,
@@ -51,7 +57,7 @@ export class FeishuClient {
       }
     });
 
-    // Add response interceptor for error handling
+    // Add response interceptor for error handling and token refresh
     this.httpClient.interceptors.response.use(
       (response) => {
         // Check if response has Feishu API error
@@ -68,7 +74,47 @@ export class FeishuClient {
         }
         return response;
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        const originalRequest = error.config as any;
+        
+        // Check if this is a token expiration error and we haven't retried yet
+        if (this.isTokenExpiredError(error) && !originalRequest._retry) {
+          // If we're already refreshing, queue this request
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            }).then((token) => {
+              if (originalRequest.headers && token) {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+              }
+              return this.httpClient(originalRequest);
+            });
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+
+          try {
+            const newToken = await this.refreshTokens();
+            
+            this.processFailedQueue(null, newToken!);
+            
+            // Update the original request with new token and retry
+            if (originalRequest.headers && newToken) {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            }
+            
+            return this.httpClient(originalRequest);
+          } catch (refreshError) {
+            this.processFailedQueue(refreshError, null);
+            
+            // If refresh fails, throw authentication error
+            throw new Error('Authentication failed. Please re-authenticate using the login command.');
+          } finally {
+            this.isRefreshing = false;
+          }
+        }
+
         throw this.handleError(error);
       }
     );
@@ -91,9 +137,89 @@ export class FeishuClient {
     };
   }
 
+  /**
+   * Check if error is due to token expiration
+   */
+  private isTokenExpiredError(error: AxiosError): boolean {
+    if (error.response?.status === 401) {
+      return true;
+    }
+    
+    if (error.response?.data) {
+      const data = error.response.data as any;
+      // Common Feishu token expiration error codes
+      const tokenErrorCodes = [
+        '99991672', // Invalid token
+        '99991671', // Token expired  
+        '99991673', // Token not found
+        '99991674', // Token invalid
+        '20037', // Refresh token expired
+        '20026' // Invalid refresh token
+      ];
+      
+      return tokenErrorCodes.includes(data.code?.toString());
+    }
+    
+    return false;
+  }
+
+  /**
+   * Process failed queue after token refresh
+   */
+  private processFailedQueue(error?: any, token?: string | null): void {
+    this.failedQueue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(token);
+      }
+    });
+    
+    this.failedQueue = [];
+  }
+
+  /**
+   * Refresh tokens using stored refresh token
+   */
+  private async refreshTokens(): Promise<string | null> {
+    const tokenInfo = await getTokenInfoFromStore();
+    
+    if (!tokenInfo?.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    if (!tokenInfo.appSecret || !tokenInfo.appId) {
+      throw new Error('App credentials not available in token store');
+    }
+
+    const refreshResponse = await OAuthServer.refreshUserAccessToken({
+      clientId: tokenInfo.appId,
+      clientSecret: tokenInfo.appSecret,
+      refreshToken: tokenInfo.refreshToken
+    });
+
+    if (!refreshResponse) {
+      throw new Error('Token refresh failed');
+    }
+
+    // Update token store with new tokens
+    const expiresAt = Math.floor(Date.now() / 1000) + refreshResponse.expires_in - 300; // 5 minutes buffer
+    await saveTokenInfoToStore({
+      accessToken: refreshResponse.access_token,
+      refreshToken: refreshResponse.refresh_token || tokenInfo.refreshToken,
+      expiresAt,
+      scopes: tokenInfo.scopes,
+      appId: tokenInfo.appId,
+      appSecret: tokenInfo.appSecret,
+      clientId: tokenInfo.clientId
+    });
+
+    return refreshResponse.access_token;
+  }
+
   // Token management methods
   private async getValidUserToken(): Promise<string> {
-    const tokenInfo = await this.tokenStore.getValidToken();
+    const tokenInfo = await getTokenInfoFromStore();
     if (!tokenInfo) {
       throw new Error('No valid user token found. Please authenticate first using login command.');
     }

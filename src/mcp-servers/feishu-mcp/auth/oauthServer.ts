@@ -1,22 +1,26 @@
 import crypto from 'crypto';
 import express from 'express';
+import { saveTokenInfoToStore, getTokenInfoFromStore } from './tokenStore.js';
 import type { Express, Request, Response } from 'express';
 import type { Server } from 'http';
-import type { TokenStore } from './tokenStore.js';
-import type { OAuthServerOptions, OAuthTokenResponse, AuthorizationResult } from './types.js';
+import type { 
+  OAuthServerOptions, 
+  OAuthTokenResponse, 
+  AuthorizationResult, 
+  RefreshTokenRequest,
+  AccessTokenRequest
+} from './types.js';
 
 export class OAuthServer {
   private app: Express;
   private server: Server | null = null;
-  private tokenStore: TokenStore;
   private options: OAuthServerOptions;
   private pendingAuthRequests = new Map<string, { 
     resolve: (value: string) => void; 
     reject: (reason?: any) => void; 
   }>();
 
-  constructor(tokenStore: TokenStore, options: OAuthServerOptions) {
-    this.tokenStore = tokenStore;
+  constructor(options: OAuthServerOptions) {
     this.options = {
       callbackPath: '/callback',
       ...options
@@ -66,12 +70,13 @@ export class OAuthServer {
       const tokenResponse = await this.exchangeCodeForToken(code as string);
       const expiresAt = Math.floor(Date.now() / 1000) + tokenResponse.expires_in - 300; // 5 minutes buffer
 
-      await this.tokenStore.storeToken({
+      await saveTokenInfoToStore({
         accessToken: tokenResponse.access_token,
-        refreshToken: tokenResponse.refresh_token,
+        refreshToken: tokenResponse.refresh_token!,
         expiresAt,
         scopes: tokenResponse.scope ? tokenResponse.scope.split(' ') : this.options.scopes!,
         appId: this.options.appId,
+        appSecret: this.options.appSecret,
         clientId: state as string
       });
 
@@ -101,7 +106,7 @@ export class OAuthServer {
     const tokenUrl = `${this.options.domain}/open-apis/authen/v2/oauth/token`;
     const callbackUrl = `http://${this.options.host}:${this.options.port}${this.options.callbackPath}`;
     
-    const payload = {
+    const payload: AccessTokenRequest = {
       grant_type: 'authorization_code',
       client_id: this.options.appId,
       client_secret: this.options.appSecret,
@@ -172,7 +177,7 @@ export class OAuthServer {
 
   async authorize(): Promise<AuthorizationResult> {
     // Check if we already have a valid token
-    const existingToken = await this.tokenStore.getValidToken();
+    const existingToken = await getTokenInfoFromStore();
     if (existingToken && existingToken.appId === this.options.appId) {
       return {
         accessToken: existingToken.accessToken,
@@ -218,55 +223,91 @@ export class OAuthServer {
   }
 
   async refreshToken(appId: string): Promise<string | null> {
-    const token = await this.tokenStore.getToken();
+    const token = await getTokenInfoFromStore();
     if (!token || !token.refreshToken || token.appId !== appId) {
       return null;
     }
 
+    // Use the static refresh method
+    const refreshResponse = await OAuthServer.refreshUserAccessToken({
+      clientId: this.options.appId,
+      clientSecret: this.options.appSecret,
+      refreshToken: token.refreshToken
+    });
+
+    if (!refreshResponse) {
+      return null;
+    }
+
+    // Update token store with new tokens
+    const expiresAt = Math.floor(Date.now() / 1000) + refreshResponse.expires_in - 300; // 5 minutes buffer
+    await saveTokenInfoToStore({
+      accessToken: refreshResponse.access_token,
+      refreshToken: refreshResponse.refresh_token || token.refreshToken,
+      expiresAt,
+      scopes: token.scopes,
+      appId: token.appId,
+      appSecret: token.appSecret,
+      clientId: token.clientId
+    });
+    
+    return refreshResponse.access_token;
+  }
+
+  /**
+   * Static method to refresh user_access_token using Feishu API
+   * Based on Feishu documentation: https://go.feishu.cn/s/6sLyroXyo03
+   * @param params Refresh token parameters
+   * @returns Promise resolving to OAuthTokenResponse or null if refresh failed
+   */
+  static async refreshUserAccessToken(params: {
+    clientId: string;
+    clientSecret: string;
+    refreshToken: string;
+    domain?: string;
+    scope?: string;
+  }): Promise<OAuthTokenResponse | null> {
+    const { clientId, clientSecret, refreshToken, domain = 'https://open.feishu.cn', scope } = params;
+    
     try {
-      const tokenUrl = `${this.options.domain}/open-apis/authen/v2/oauth/token`;
+      const tokenUrl = `${domain}/open-apis/authen/v2/oauth/token`;
       
+      const payload: RefreshTokenRequest = {
+        grant_type: 'refresh_token',
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken
+      };
+
+      // Optional scope parameter for reducing permissions
+      if (scope) {
+        payload.scope = scope;
+      }
+
       const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          grant_type: 'refresh_token',
-          client_id: this.options.appId,
-          client_secret: this.options.appSecret,
-          refresh_token: token.refreshToken
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
-        throw new Error(`Token refresh failed: ${response.status}`);
+        console.warn(`Refresh token HTTP error: ${response.status} ${response.statusText}`);
+        return null;
       }
 
       const data = await response.json();
       
       if (data.code !== 0) {
-        throw new Error(`Feishu API error: ${data.code} ${data.msg}`);
+        console.warn(`Feishu API error: code=${data.code}, error=${data.error}, description=${data.error_description}`);
+        return null;
       }
 
-      const tokenResponse = data as OAuthTokenResponse;
-      const expiresAt = Math.floor(Date.now() / 1000) + tokenResponse.expires_in - 300;
-
-      await this.tokenStore.storeToken({
-        accessToken: tokenResponse.access_token,
-        refreshToken: tokenResponse.refresh_token || token.refreshToken,
-        expiresAt,
-        scopes: token.scopes,
-        appId: token.appId,
-        clientId: token.clientId
-      });
-
-      return tokenResponse.access_token;
+      return data as OAuthTokenResponse;
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      // Remove invalid token
-      await this.tokenStore.removeToken();
+      console.warn('Refresh token request failed:', error);
       return null;
     }
   }
