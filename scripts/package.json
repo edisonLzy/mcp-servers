@@ -1,9 +1,0 @@
-{
-  "name": "release-script",
-  "type": "module",
-  "dependencies": {
-    "simple-git": "^3.25.0",
-    "inquirer": "^10.0.0",
-    "picocolors": "^1.1.1"
-  }
-}

@@ -1,92 +1,17 @@
-#!/usr/bin/env -S pnpx tsx
-
-import { execSync, exec } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import inquirer from 'inquirer';
+import logSymbols from 'log-symbols';
 import picocolors from 'picocolors';
+import { simpleGit, type LogResult } from 'simple-git';
 
-const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// 简化版 Git 操作，兼容 simple-git 风格的 API
-const git = {
-  async status() {
-    const { stdout } = await execAsync('git status --porcelain');
-    return {
-      isClean: () => !stdout.trim(),
-    };
-  },
-
-  async branch() {
-    const { stdout } = await execAsync('git branch --show-current');
-    return {
-      current: stdout.trim(),
-    };
-  },
-
-  async tags() {
-    try {
-      const { stdout } = await execAsync('git describe --tags --abbrev=0');
-      return { latest: stdout.trim() };
-    } catch {
-      return { latest: null };
-    }
-  },
-
-  async log(options?: { from?: string; to?: string }) {
-    let command = 'git log --pretty=format:"%H|%s"';
-    if (options?.from && options?.to) {
-      command += ` ${options.from}..${options.to}`;
-    } else if (options?.from) {
-      command += ` ${options.from}..HEAD`;
-    }
-
-    const { stdout } = await execAsync(command);
-    if (!stdout.trim()) {
-      return { all: [] };
-    }
-
-    const commits = stdout.trim().split('\n')
-      .filter(line => line.trim())
-      .map(line => {
-        const [hash, message] = line.split('|');
-        return { hash, message };
-      });
-
-    return { all: commits };
-  },
-
-  async add(files: string[]) {
-    const relativePaths = files.map(file => path.join('..', file));
-    await execAsync(`git add ${relativePaths.join(' ')}`);
-  },
-
-  async commit(message: string) {
-    await execAsync(`git commit -m "${message}"`);
-  },
-
-  async addAnnotatedTag(tag: string, message: string) {
-    await execAsync(`git tag -a ${tag} -m "${message}"`);
-  },
-
-  async push(remote: string, branch: string) {
-    await execAsync(`git push ${remote} ${branch}`);
-  },
-
-  async pushTags(remote: string) {
-    await execAsync(`git push ${remote} --tags`);
-  },
-};
-
-// 日志符号 - 兼容不同平台
-const logSymbols = {
-  info: process.platform === 'win32' ? 'i' : 'ℹ',
-  success: process.platform === 'win32' ? '√' : '✔',
-  warning: process.platform === 'win32' ? '‼' : '⚠',
-  error: process.platform === 'win32' ? '×' : '✖',
-};
+const git = simpleGit();
 
 // 创建日志实例
 const logger = {
@@ -205,9 +130,9 @@ class PreflightChecks {
 
   private async checkNpmAuth(): Promise<void> {
     try {
-      await execAsync('npm whoami');
+      execSync('npm whoami', { stdio: 'pipe' });
       logger.info('npm 已登录');
-    } catch (error) {
+    } catch {
       logger.error('npm 未登录，请先运行 npm login');
       process.exit(1);
     }
@@ -223,7 +148,7 @@ class PreflightChecks {
       
       execSync('pnpm test', { stdio: 'inherit' });
       logger.success('测试通过');
-    } catch (error) {
+    } catch {
       logger.error('测试失败');
       process.exit(1);
     }
@@ -239,7 +164,7 @@ class PreflightChecks {
       
       execSync('pnpm lint', { stdio: 'inherit' });
       logger.success('代码检查通过');
-    } catch (error) {
+    } catch {
       logger.error('代码检查失败');
       process.exit(1);
     }
@@ -252,7 +177,7 @@ class VersionManager {
   private packagePath: string;
 
   constructor() {
-    this.packagePath = path.join(process.cwd(), '..', 'package.json');
+    this.packagePath = path.resolve(__dirname, '..', 'package.json');
     this.packageJson = this.loadPackageJson();
   }
 
@@ -260,7 +185,7 @@ class VersionManager {
     try {
       const content = fs.readFileSync(this.packagePath, 'utf-8');
       return JSON.parse(content);
-    } catch (error) {
+    } catch {
       logger.error('无法读取 package.json');
       process.exit(1);
     }
@@ -416,15 +341,15 @@ class GitManager {
       const tags = await git.tags();
       const latestTag = tags.latest;
       
-      let logs;
+      let logs: LogResult;
       if (latestTag) {
         logs = await git.log({ from: latestTag, to: 'HEAD' });
       } else {
         logs = await git.log();
       }
       
-      return logs.all.map((commit: any) => this.parseCommitMessage(commit.hash, commit.message));
-    } catch (error) {
+      return logs.all.map((commit) => this.parseCommitMessage(commit.hash, commit.message));
+    } catch {
       logger.warn('无法获取提交历史，可能是首次发布');
       return [];
     }
@@ -526,7 +451,7 @@ class ChangelogGenerator {
   }
 
   updateChangelog(entry: ChangelogEntry, dryRun: boolean = false): void {
-    const changelogPath = path.join(process.cwd(), '..', 'CHANGELOG.md');
+    const changelogPath = path.resolve(__dirname, '..', 'CHANGELOG.md');
     const newSection = this.formatChangelogEntry(entry);
 
     if (dryRun) {
