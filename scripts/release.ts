@@ -130,7 +130,7 @@ class PreflightChecks {
 
   private async checkNpmAuth(): Promise<void> {
     try {
-      execSync('npm whoami', { stdio: 'pipe' });
+      execSync('npm whoami --registry=https://registry.npmjs.org/', { stdio: 'pipe' });
       logger.info('npm 已登录');
     } catch {
       logger.error('npm 未登录，请先运行 npm login');
