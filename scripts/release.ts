@@ -105,6 +105,8 @@ interface ReleaseConfig {
   noGit: boolean;
   help: boolean;
   nonInteractive: boolean;
+  ci: boolean;
+  checkOnly: boolean;
 }
 
 interface PackageJson {
@@ -131,7 +133,7 @@ interface ChangelogEntry {
   others: CommitInfo[];
 }
 
-type VersionType = 'patch' | 'minor' | 'major' | 'custom';
+type VersionType = 'patch' | 'minor' | 'major' | 'custom' | 'auto';
 
 // 预检查模块
 class PreflightChecks {
@@ -283,22 +285,46 @@ class VersionManager {
     }
   }
 
-  async selectVersion(config?: ReleaseConfig): Promise<string> {
+  async selectVersion(config?: ReleaseConfig): Promise<string | null> {
     const currentVersion = this.getCurrentVersion();
-    const patchVersion = this.bumpVersion(currentVersion, 'patch');
-    const minorVersion = this.bumpVersion(currentVersion, 'minor');
-    const majorVersion = this.bumpVersion(currentVersion, 'major');
-
+    
     // 如果指定了版本类型，直接返回
-    if (config?.versionType) {
+    if (config?.versionType && config.versionType !== 'auto') {
       return this.bumpVersion(currentVersion, config.versionType);
+    }
+
+    // 自动版本推断模式
+    if (config?.versionType === 'auto' || config?.ci) {
+      const gitManager = new GitManager(config || {} as ReleaseConfig);
+      const commits = await gitManager.getCommitsSinceLastTag();
+      
+      if (commits.length === 0) {
+        logger.info('没有新的提交，跳过发布');
+        return null;
+      }
+
+      const versionType = this.determineVersionType(commits);
+      if (!versionType) {
+        logger.info('没有需要发布的重要更改，跳过发布');
+        return null;
+      }
+
+      const newVersion = this.bumpVersion(currentVersion, versionType);
+      logger.info(`基于提交历史自动确定版本类型: ${versionType} (${currentVersion} → ${newVersion})`);
+      return newVersion;
     }
 
     // 非交互模式默认使用 patch
     if (config?.nonInteractive) {
+      const patchVersion = this.bumpVersion(currentVersion, 'patch');
       logger.info(`非交互模式，使用默认的 patch 版本: ${patchVersion}`);
       return patchVersion;
     }
+
+    // 交互模式
+    const patchVersion = this.bumpVersion(currentVersion, 'patch');
+    const minorVersion = this.bumpVersion(currentVersion, 'minor');
+    const majorVersion = this.bumpVersion(currentVersion, 'major');
 
     const { versionChoice } = await inquirer.prompt([{
       type: 'list',
@@ -326,6 +352,43 @@ class VersionManager {
     }
 
     return this.bumpVersion(currentVersion, versionChoice as VersionType);
+  }
+
+  private determineVersionType(commits: CommitInfo[]): VersionType | null {
+    let hasBreaking = false;
+    let hasFeature = false;
+    let hasFix = false;
+
+    for (const commit of commits) {
+      if (commit.breaking) {
+        hasBreaking = true;
+        break; // Breaking change takes precedence
+      }
+      if (commit.type === 'feat') {
+        hasFeature = true;
+      }
+      if (commit.type === 'fix') {
+        hasFix = true;
+      }
+    }
+
+    if (hasBreaking) {
+      return 'major';
+    }
+    if (hasFeature) {
+      return 'minor';
+    }
+    if (hasFix) {
+      return 'patch';
+    }
+
+    // 检查是否有其他值得发布的提交类型
+    const releaseWorthyTypes = ['perf', 'revert'];
+    const hasReleaseWorthy = commits.some(commit => 
+      releaseWorthyTypes.includes(commit.type)
+    );
+
+    return hasReleaseWorthy ? 'patch' : null;
   }
 
   updatePackageVersion(newVersion: string, dryRun: boolean = false): void {
@@ -560,7 +623,19 @@ class ReleaseManager {
 
   async run(): Promise<void> {
     try {
-      console.log(picocolors.cyan('\n🚀 开始发布流程\n'));
+      if (this.config.checkOnly) {
+        logger.start('检查是否需要发布...');
+        const newVersion = await this.versionManager.selectVersion(this.config);
+        if (newVersion) {
+          logger.success(`需要发布版本: ${newVersion}`);
+          process.exit(0);
+        } else {
+          logger.info('不需要发布');
+          process.exit(1);
+        }
+      }
+
+      console.log('\n🚀 开始发布流程\n');
 
       // 预检查
       const preflightChecks = new PreflightChecks(this.config);
@@ -571,9 +646,14 @@ class ReleaseManager {
       
       // 选择版本
       const newVersion = await this.versionManager.selectVersion(this.config);
+      
+      if (!newVersion) {
+        logger.info('没有需要发布的更改，退出');
+        process.exit(0);
+      }
 
       // 确认发布
-      if (!this.config.dryRun && !this.config.nonInteractive) {
+      if (!this.config.dryRun && !this.config.nonInteractive && !this.config.ci) {
         const { confirm } = await inquirer.prompt([{
           type: 'confirm',
           name: 'confirm',
@@ -585,8 +665,8 @@ class ReleaseManager {
           logger.info('发布已取消');
           process.exit(0);
         }
-      } else if (this.config.nonInteractive) {
-        logger.info(`非交互模式，自动确认发布版本 ${newVersion}`);
+      } else if (this.config.nonInteractive || this.config.ci) {
+        logger.info(`${this.config.ci ? 'CI' : '非交互'}模式，自动确认发布版本 ${newVersion}`);
       }
 
       // 更新版本
@@ -606,11 +686,15 @@ class ReleaseManager {
       // 推送到远程
       await this.gitManager.pushToRemote();
 
-      console.log(picocolors.green(`\n✨ 发布完成！版本: ${newVersion}\n`));
+      console.log(`\n✨ 发布完成！版本: ${newVersion}\n`);
 
     } catch (error) {
       logger.error(`发布失败: ${(error as Error).message}`);
-      process.exit(1);
+      if (this.config.ci) {
+        process.exit(1);
+      } else {
+        throw error;
+      }
     }
   }
 }
@@ -624,6 +708,8 @@ function parseArgs(): ReleaseConfig {
     noGit: false,
     help: false,
     nonInteractive: false,
+    ci: false,
+    checkOnly: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -645,10 +731,30 @@ function parseArgs(): ReleaseConfig {
       case '--non-interactive':
         config.nonInteractive = true;
         break;
+      case '--ci':
+        config.ci = true;
+        config.nonInteractive = true;
+        if (!config.versionType) {
+          config.versionType = 'auto';
+        }
+        break;
+      case '--check-only':
+        config.checkOnly = true;
+        config.versionType = 'auto';
+        break;
       case '--help':
       case '-h':
         config.help = true;
         break;
+    }
+  }
+
+  // CI 环境自动检测
+  if (process.env.CI === 'true' && !config.ci) {
+    config.ci = true;
+    config.nonInteractive = true;
+    if (!config.versionType) {
+      config.versionType = 'auto';
     }
   }
 
@@ -657,24 +763,36 @@ function parseArgs(): ReleaseConfig {
 
 function showHelp(): void {
   console.log(`
-${picocolors.cyan('发布工具')}
+发布工具
 
 用法:
-  pnpx tsx scripts/release.ts [选项]
+  pnpm tsx scripts/release.ts [选项]
 
 选项:
-  --dry-run          模拟运行，不执行实际操作
-  --skip-checks      跳过预检查
-  --version <type>   指定版本类型 (patch|minor|major)
-  --no-git           跳过 git 操作
-  --non-interactive  非交互模式
-  --help, -h         显示帮助信息
+  --dry-run            模拟运行，不执行实际操作
+  --skip-checks        跳过预检查
+  --version <type>     指定版本类型 (patch|minor|major|auto)
+  --no-git             跳过 git 操作
+  --non-interactive    非交互模式
+  --ci                 CI 模式 (自动启用非交互和自动版本推断)
+  --check-only         仅检查是否需要发布 (用于 CI)
+  --help, -h           显示帮助信息
+
+版本类型:
+  patch    补丁版本 (0.1.0 → 0.1.1) - 错误修复
+  minor    次版本 (0.1.0 → 0.2.0) - 新功能
+  major    主版本 (0.1.0 → 1.0.0) - 破坏性更改
+  auto     自动推断 - 基于 conventional commits
 
 示例:
-  pnpx tsx scripts/release.ts
-  pnpx tsx scripts/release.ts --dry-run
-  pnpx tsx scripts/release.ts --version patch
-  pnpx tsx scripts/release.ts --non-interactive --version minor
+  pnpm tsx scripts/release.ts
+  pnpm tsx scripts/release.ts --dry-run
+  pnpm tsx scripts/release.ts --version patch
+  pnpm tsx scripts/release.ts --ci
+  pnpm tsx scripts/release.ts --check-only
+
+CI/CD 用法:
+  pnpm tsx scripts/release.ts --ci --skip-checks
 `);
 }
 
