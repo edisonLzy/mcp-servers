@@ -6,7 +6,7 @@
   "author": "MCP Servers Team",
   "type": "module",
   "bin": {
-    "mcp-servers": "src/cli.ts"
+    "codemons-mcp": "src/cli.ts"
   },
   "files": [
     "src"

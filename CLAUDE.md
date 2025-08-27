@@ -107,15 +107,29 @@ interface MCPServerOptions {
 - Module name: `prompts-mcp`
 
 ## Testing
-- Uses Vitest for testing
-- Test files should be in `tests/` directory with `.test.ts` extension
-- Run tests with coverage using `pnpm coverage`
+- Uses Vitest for testing with coverage support  
+- Test files: `src/**/*.test.ts` and `tests/**/*.test.ts`
+- Run tests: `pnpm test` or `vitest run`
+- Coverage reports: `pnpm coverage` or `vitest run --coverage`
+
+## Code Quality and Git Workflow
+- Follows Conventional Commits specification (see COMMIT_CONVENTION.md)
+- Uses Husky for Git hooks with lint-staged pre-commit checks
+- ESLint with comprehensive rules: stylistic formatting, unused imports cleanup, import ordering
+- TypeScript strict mode with declaration-only compilation
 
 ## CLI Tool
 The main CLI tool (`mcp-servers`) provides unified access to all MCP servers with commands for running, authentication, and debugging.
 
 ## Build and Development
 - Use `tsx` for direct TypeScript execution during development
-- TypeScript config: ESNext target, ES modules, strict mode, declaration only
+- TypeScript config: ESNext target, ES modules, strict mode, declaration only  
 - No build step required for development - run directly with `tsx`
-- Single package architecture simplifies dependency management
+- Single package architecture (migrated from monorepo) simplifies dependency management
+- Package manager: pnpm with global linking (`pnpm link --global` on postinstall)
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
