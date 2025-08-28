@@ -76,10 +76,9 @@ jobs:
       - name: Check if release is needed
         id: check_release
         run: |
-          cd scripts
           if [[ "${{ steps.version.outputs.type }}" == "auto" ]]; then
             # Check if there are any commits since last tag that warrant a release
-            if pnpm tsx release.ts --check-only 2>/dev/null; then
+            if pnpm tsx scripts/release.ts --check-only 2>/dev/null; then
               echo "needed=true" >> $GITHUB_OUTPUT
               echo "Release is needed based on commit analysis"
             else
@@ -94,11 +93,10 @@ jobs:
       - name: Run release script
         if: steps.check_release.outputs.needed == 'true'
         run: |
-          cd scripts
           if [[ "${{ steps.version.outputs.type }}" == "auto" ]]; then
-            pnpm tsx release.ts --non-interactive --ci
+            pnpm tsx scripts/release.ts --non-interactive --ci
           else
-            pnpm tsx release.ts --non-interactive --ci --version "${{ steps.version.outputs.type }}"
+            pnpm tsx scripts/release.ts --non-interactive --ci --version "${{ steps.version.outputs.type }}"
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
