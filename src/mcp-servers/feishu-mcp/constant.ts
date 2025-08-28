@@ -11,5 +11,5 @@ export const FEISHU_SCOPES = [
   'docx:document',
   'docx:document.block:convert',
   'bitable:app',
-  
+  'offline_access'
 ];

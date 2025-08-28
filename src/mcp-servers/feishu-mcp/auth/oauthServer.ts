@@ -176,15 +176,6 @@ export class OAuthServer {
   }
 
   async authorize(): Promise<AuthorizationResult> {
-    // Check if we already have a valid token
-    const existingToken = await getTokenInfoFromStore();
-    if (existingToken && existingToken.appId === this.options.appId) {
-      return {
-        accessToken: existingToken.accessToken,
-        needsAuthorization: false
-      };
-    }
-
     // Generate state parameter
     const state = crypto.randomUUID();
     
