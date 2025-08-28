@@ -129,6 +129,12 @@ class PreflightChecks {
   }
 
   private async checkNpmAuth(): Promise<void> {
+    // In CI environments, npm authentication is handled via NODE_AUTH_TOKEN
+    if (this.config.ci && process.env.NODE_AUTH_TOKEN) {
+      logger.info('npm 认证通过 NODE_AUTH_TOKEN 配置');
+      return;
+    }
+
     try {
       execSync('npm whoami --registry=https://registry.npmjs.org/', { stdio: 'pipe' });
       logger.info('npm 已登录');
