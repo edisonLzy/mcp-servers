@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2] - 2025-08-28
+
+### Bug Fixes
+
+- **release**: update release script path in GitHub Actions workflow (119c61d)
+- **feishu-mcp**: update OAuthServer authorization logic and add offline access scope (52b5775)
+
 ## [0.1.1] - 2025-08-27
 
 ### Features
