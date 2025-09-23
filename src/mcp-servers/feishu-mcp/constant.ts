@@ -11,5 +11,9 @@ export const FEISHU_SCOPES = [
   'docx:document',
   'docx:document.block:convert',
   'bitable:app',
-  'offline_access'
+  'offline_access',
+  'board:whiteboard:node:read',
+  'board:whiteboard:node:create',
+  'board:whiteboard:node:update',
+  'board:whiteboard:node:delete',
 ];

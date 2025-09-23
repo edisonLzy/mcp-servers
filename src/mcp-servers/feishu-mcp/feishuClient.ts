@@ -35,7 +35,11 @@ import type {
   BitableBatchDeleteRecordsResponse,
   BitableListTablesResponse,
   BitableListFieldsResponse,
-  WikiNodeInfoResponse
+  WikiNodeInfoResponse,
+  BoardThemeResponse,
+  CreateBoardNodesRequest,
+  CreateBoardNodesResponse,
+  GetBoardNodesResponse
 } from './types/feishu.js';
 import type { AxiosInstance, AxiosError } from 'axios';
 
@@ -541,7 +545,7 @@ export class FeishuClient {
       data,
       {
         headers,
-        params
+        params,
       }
     );
     
@@ -703,6 +707,68 @@ export class FeishuClient {
       }
     );
     
+    return response.data.data;
+  }
+
+  // Board API methods
+  async getBoardTheme(whiteboardId: string): Promise<BoardThemeResponse> {
+    const headers = await this.getAuthHeaders();
+
+    interface GetBoardThemeResponse extends FeishuResponse {
+      data: BoardThemeResponse;
+    }
+
+    const response = await this.httpClient.get<GetBoardThemeResponse>(
+      `/board/v1/whiteboards/${whiteboardId}/theme`,
+      { headers }
+    );
+
+    return response.data.data;
+  }
+
+  async createBoardNodes(
+    whiteboardId: string,
+    data: CreateBoardNodesRequest,
+    clientToken?: string,
+    userIdType?: string
+  ): Promise<CreateBoardNodesResponse> {
+    const headers = await this.getAuthHeaders();
+
+    const params: Record<string, any> = {};
+    if (clientToken) params.client_token = clientToken;
+    if (userIdType) params.user_id_type = userIdType;
+
+    interface CreateBoardNodesApiResponse extends FeishuResponse {
+      data: CreateBoardNodesResponse;
+    }
+
+    const response = await this.httpClient.post<CreateBoardNodesApiResponse>(
+      `/board/v1/whiteboards/${whiteboardId}/nodes`,
+      data,
+      { headers, params }
+    );
+
+    return response.data.data;
+  }
+
+  async getBoardNodes(
+    whiteboardId: string,
+    userIdType?: string
+  ): Promise<GetBoardNodesResponse> {
+    const headers = await this.getAuthHeaders();
+
+    const params: Record<string, any> = {};
+    if (userIdType) params.user_id_type = userIdType;
+
+    interface GetBoardNodesApiResponse extends FeishuResponse {
+      data: GetBoardNodesResponse;
+    }
+
+    const response = await this.httpClient.get<GetBoardNodesApiResponse>(
+      `/board/v1/whiteboards/${whiteboardId}/nodes`,
+      { headers, params }
+    );
+
     return response.data.data;
   }
 }

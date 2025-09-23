@@ -327,6 +327,12 @@ export interface CreateBlockRequest {
     };
     children?: CreateBlockRequest[];
   };
+  board?: {
+    token?: string;
+    align?: 1 | 2 | 3;
+    width?: number;
+    height?: number;
+  };
 }
 
 export interface CreateBlocksRequest {
@@ -801,4 +807,81 @@ export interface WikiNodeInfoResponse {
     owner?: string;
     node_creator?: string;
   };
+}
+
+// Board Node types - 画板节点管理
+export interface BoardNodeText {
+  text?: string;
+  font_weight?: 'regular' | 'bold';
+  font_size?: number;
+  horizontal_align?: 'left' | 'center' | 'right';
+  vertical_align?: 'top' | 'mid' | 'bottom';
+  text_color?: string;
+  text_background_color?: string;
+  line_through?: boolean;
+  underline?: boolean;
+  italic?: boolean;
+  angle?: 0 | 90 | 180 | 270;
+  theme_text_color_code?: number;
+  theme_text_background_color_code?: number;
+}
+
+export interface BoardNodeStyle {
+  fill_color?: string;
+  fill_opacity?: number;
+  border_style?: 'solid' | 'none' | 'dashed' | 'dotted';
+  border_width?: 'narrow' | 'thin' | 'medium' | 'bold';
+  border_opacity?: number;
+  h_flip?: boolean;
+  v_flip?: boolean;
+  border_color?: string;
+  theme_fill_color_code?: number;
+  theme_border_color_code?: number;
+}
+
+export interface BoardNode {
+  id: string;
+  type: string;
+  parent_id?: string;
+  x?: number;
+  y?: number;
+  angle?: number;
+  height?: number;
+  width?: number;
+  text?: BoardNodeText;
+  style?: BoardNodeStyle;
+  locked?: boolean;
+  z_index?: number;
+  // 支持各种特殊节点类型属性
+  composite_shape?: {
+    type: string;
+    pie?: {
+      start_radial_line_angle: number;
+      central_angle: number;
+      radius: number;
+      sector_ratio?: number;
+    };
+  };
+  image?: {
+    token: string;
+  };
+  // 其他节点类型可以根据需要扩展...
+}
+
+export interface CreateBoardNodesRequest {
+  nodes: BoardNode[];
+}
+
+export interface CreateBoardNodesResponse {
+  ids: string[];
+  client_token?: string;
+}
+
+export interface GetBoardNodesResponse {
+  nodes: (BoardNode & { children?: string[] })[];
+}
+
+// Board Theme types (保留原有的主题相关类型)
+export interface BoardThemeResponse {
+  theme: 'classic' | 'simple-gray' | 'retro' | 'colorful' | 'simple-blue' | 'default';
 }
