@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0] - 2025-09-23
+
+### Features
+
+- **feishu-mcp**: 新增画板节点管理工具 (52308cb)
+- add mcp config (e97d78b)
+- **scripts**: 在CI环境下通过 NODE_AUTH_TOKEN 跳过 npm 登录检查 (428b7f1)
+
 ## [0.1.2] - 2025-08-28
 
 ### Bug Fixes
