@@ -14,6 +14,7 @@ import { registerDeleteDocumentBlocksTool } from './tools/docx/deleteDocumentBlo
 import { registerConvertContentToBlocksTool } from './tools/docx/convertContentToBlocks.js';
 import { registerCreateDocumentBlocksTool } from './tools/docx/createDocumentBlocks.js';
 import { registerBitableTools } from './tools/bitable/index.js';
+import { registerBoardTools } from './tools/board/index.js';
 import { authFeishuMCP } from './auth/index.js';
 import type { MCPServerOptions } from '../../types.js';
 
@@ -46,6 +47,7 @@ async function runFeishuMCP(): Promise<void> {
   registerConvertContentToBlocksTool(server, feishuClient);
   registerCreateDocumentBlocksTool(server, feishuClient);
   registerBitableTools(server, feishuClient);
+  registerBoardTools(server, feishuClient);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();

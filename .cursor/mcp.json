@@ -8,26 +8,12 @@
         "recall-developer-documents"
       ]
     },
-    "feishu-mcp": {
-      "command": "codemons-mcp",
-      "args": [
-        "feishu-mcp"
-      ],
-      "type": "stdio"
-    },
-    "figma-mcp": {
-      "command": "codemons-mcp",
-      "args": [
-        "figma-mcp"
-      ],
-      "type": "stdio"
-    },
-    "prompts-mcp": {
-      "command": "codemons-mcp",
-      "args": [
-        "prompts-mcp"
-      ],
-      "type": "stdio"
+    "playwright": {
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@latest",
+          "--extension"
+        ]
     }
   }
 }
