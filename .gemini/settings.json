@@ -1,9 +1,15 @@
 {
   "mcpServers": {
-    "prompts-mcp": {
-      "command": "tsx",
+    "feishu-mcp": {
+      "command": "codemons-mcp",
       "args": [
-        "/Users/zhiyu/Desktop/coding/mcp-servers/packages/prompts-mcp/src/index.ts"
+        "feishu-mcp"
+      ]
+    },
+    "prompts-mcp": {
+      "command": "codemons-mcp",
+      "args": [
+        "prompts-mcp"
       ]
     }
   }
