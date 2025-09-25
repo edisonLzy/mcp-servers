@@ -15,6 +15,7 @@ import { registerConvertContentToBlocksTool } from './tools/docx/convertContentT
 import { registerCreateDocumentBlocksTool } from './tools/docx/createDocumentBlocks.js';
 import { registerBitableTools } from './tools/bitable/index.js';
 import { registerBoardTools } from './tools/board/index.js';
+import { registerPrompts } from './prompts/index.js';
 import { authFeishuMCP } from './auth/index.js';
 import type { MCPServerOptions } from '../../types.js';
 
@@ -27,7 +28,8 @@ async function runFeishuMCP(): Promise<void> {
     version: '0.1.0'
   }, {
     capabilities: {
-      tools: {}
+      tools: {},
+      prompts: {}
     }
   });
 
@@ -48,6 +50,9 @@ async function runFeishuMCP(): Promise<void> {
   registerCreateDocumentBlocksTool(server, feishuClient);
   registerBitableTools(server, feishuClient);
   registerBoardTools(server, feishuClient);
+
+  // Register prompts
+  registerPrompts(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();

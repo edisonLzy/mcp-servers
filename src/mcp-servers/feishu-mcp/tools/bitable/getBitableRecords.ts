@@ -37,6 +37,7 @@ export function registerGetBitableRecordsTool(server: McpServer, client: FeishuC
       filter_operator,
       filter_value
     }) => {
+      
       return runWithExceptionHandler(async () => {
         // Build request data
         const requestData: any = {
