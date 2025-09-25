@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0] - 2025-09-25
+
+### Features
+
+- **feishu-mcp**: 优化 Daily Note 工作流并集成 MCP 配置 (4c1b602)
+- **feishu-mcp**: 新增 prompts 功能和 Daily Note 汇总工作流 (d554e24)
+
 ## [0.2.0] - 2025-09-23
 
 ### Features
