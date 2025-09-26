@@ -36,6 +36,7 @@
   "dependencies": {
     "@modelcontextprotocol/inspector": "^0.16.5",
     "@modelcontextprotocol/sdk": "^1.17.1",
+    "@types/xlsx": "^0.0.36",
     "axios": "^1.6.0",
     "commander": "^14.0.0",
     "dotenv": "^16.5.0",
@@ -45,6 +46,7 @@
     "log-symbols": "^7.0.1",
     "picocolors": "^1.1.1",
     "simple-git": "^3.28.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.42"
   },
   "devDependencies": {
