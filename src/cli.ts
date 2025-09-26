@@ -1,17 +1,24 @@
 #!/usr/bin/env -S pnpx tsx
 
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { Command } from 'commander';
 import { listAction } from './commands/list.js';
 import { runAction } from './commands/run.js';
 import { authAction } from './commands/auth.js';
 import { inspectorAction } from './commands/inspector.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
   .name('mcp-servers')
   .description('CLI for MCP Servers')
-  .version('0.1.0');
+  .version(packageJson.version);
 
 // List command to show available MCP servers
 program
