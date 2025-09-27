@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0] - 2025-09-27
+
+### Features
+
+- **feishu-mcp**: 增加学习笔记整理和英语语法分析工作流 (ee1ba2a)
+- **feishu-mcp**: 更新每日笔记工作流，优化执行步骤和输出格式 (ae0516d)
+- **mcp-servers**: 新增 xlsx-mcp 服务器和需求管理 prompts (4a8d28a)
+
+### Bug Fixes
+
+- **cli**: update version retrieval to use package.json (38a3a97)
+
 ## [0.3.0] - 2025-09-25
 
 ### Features
