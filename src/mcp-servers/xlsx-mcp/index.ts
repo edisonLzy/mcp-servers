@@ -4,10 +4,12 @@ import { registerGetRecordsFromSheetTool } from './tools/getRecordsFromSheet.js'
 import { registerListSheetFromFileTool } from './tools/listSheetFromFile.js';
 import type { MCPServerOptions } from '../../types.js';
 
-async function runXlsxMCP(): Promise<void> {
+const MCP_SERVER_NAME = 'xlsx-mcp';
+
+async function run(): Promise<void> {
   // Create an MCP server
   const server = new McpServer({
-    name: 'xlsx-mcp',
+    name: MCP_SERVER_NAME,
     version: '0.1.0'
   }, {
     capabilities: {
@@ -22,12 +24,13 @@ async function runXlsxMCP(): Promise<void> {
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  console.error('XLSX MCP Server started successfully!');
 }
 
 const xlsxMCPServer: MCPServerOptions = {
-  name: 'xlsx-mcp',
+  name: MCP_SERVER_NAME,
   description: 'Excel file reader with advanced querying capabilities for .xlsx files',
-  run: runXlsxMCP,
+  run,
   requiresAuth: false
 };
 
