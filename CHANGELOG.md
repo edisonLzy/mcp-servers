@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0] - 2025-10-23
+
+### Features
+
+- test release (267baa5)
+
+### Bug Fixes
+
+- **feishu-mcp**: 修复 createDocumentBlocks 超过 50 个 blocks 创建失败问题 (c68d2a9)
+
 ## [0.4.0] - 2025-09-27
 
 ### Features
