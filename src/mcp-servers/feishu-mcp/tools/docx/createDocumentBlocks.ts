@@ -4,6 +4,9 @@ import type { FeishuClient } from '../../feishuClient.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CreateBlocksRequest, CreateBlocksResponse, CreateBlockRequest } from '../../types/feishu.js';
 
+// Batch size for creating document blocks to avoid API limits
+const BATCH_SIZE = 30;
+
 // Text element schema
 const textElementStyleSchema = z.object({
   bold: z.boolean().optional(),
@@ -182,20 +185,50 @@ export async function createDocumentBlocks(
   client: FeishuClient,
   args: CreateDocumentBlocksArgs
 ): Promise<CreateBlocksResponse> {
-  const request: CreateBlocksRequest = {
-    index: args.index,
-    children: args.blocks
-  };
-
   // Use document_id as block_id if not provided (create at document root level)
   const targetBlockId = args.block_id || args.document_id;
 
-  return await client.createDocumentBlocks(
-    args.document_id,
-    targetBlockId,
-    request,
-    args.document_revision_id || -1
-  );
+  // Split blocks into batches to avoid API limits
+  const batches: CreateBlockRequest[][] = [];
+  for (let i = 0; i < args.blocks.length; i += BATCH_SIZE) {
+    batches.push(args.blocks.slice(i, i + BATCH_SIZE));
+  }
+
+  // Process batches sequentially
+  const allCreatedBlocks: CreateBlocksResponse['children'] = [];
+  let currentIndex = args.index;
+  let currentRevisionId = args.document_revision_id || -1;
+
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+    const batch = batches[batchIndex];
+    const request: CreateBlocksRequest = {
+      index: currentIndex,
+      children: batch
+    };
+
+    const result = await client.createDocumentBlocks(
+      args.document_id,
+      targetBlockId,
+      request,
+      currentRevisionId
+    );
+
+    // Collect created blocks
+    allCreatedBlocks.push(...result.children);
+
+    // Update index for next batch (insert after the blocks we just created)
+    currentIndex += batch.length;
+
+    // Update revision ID for next batch to avoid conflicts
+    currentRevisionId = result.document_revision_id;
+  }
+
+  // Return combined result in the same format as single batch
+  return {
+    children: allCreatedBlocks,
+    document_revision_id: currentRevisionId,
+    client_token: ''
+  };
 }
 
 export function registerCreateDocumentBlocksTool(server: McpServer, client: FeishuClient) {
@@ -208,7 +241,7 @@ export function registerCreateDocumentBlocksTool(server: McpServer, client: Feis
         async () => {
           // Use document_id as block_id if not provided (create at document root level)
           const targetBlockId = block_id || document_id;
-          
+
           const result = await createDocumentBlocks(client, {
             document_id,
             block_id: targetBlockId,
@@ -216,7 +249,7 @@ export function registerCreateDocumentBlocksTool(server: McpServer, client: Feis
             blocks,
             document_revision_id
           });
-          
+
           return {
             content: [{
               type: 'text',
