@@ -27,7 +27,7 @@ export async function runAction(serverName: string, verbose: boolean = false): P
   
   let spawnArgs: string[];
   if (verbose) {
-    const loggerPath = path.join(__dirname, '..', 'logger.ts');
+    const loggerPath = path.join(__dirname, '..', 'verbose.ts');
     spawnArgs = ['tsx', loggerPath, 'tsx', serverRunnerPath, serverName];
     console.log('📝 启用详细日志记录');
   } else {

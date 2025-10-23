@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 // 计算日志文件路径：输出到项目根目录的logger目录下，按照<server-name>.log格式命名
 function getLogFilePath(): string {
   // 从命令行参数中提取server-name (process.argv[4])
-  // 参数格式：node logger.ts tsx runner.ts <server-name>
+  // 参数格式：node verbose.ts tsx runner.ts <server-name>
   const serverName = process.argv[4];
   
   if (!serverName) {
@@ -38,7 +38,7 @@ function getLogFilePath(): string {
 
 // 获取项目根目录
 function getProjectRoot(): string {
-  // 当前文件在 src/logger.ts，所以项目根目录是上一级
+  // 当前文件在 src/verbose.ts，所以项目根目录是上一级
   return path.dirname(path.dirname(__filename));
 }
 
