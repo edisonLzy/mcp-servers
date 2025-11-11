@@ -17,13 +17,12 @@ export function registerSaveToFeishuPrompt(server: McpServer) {
       const markdownPath = join(__dirname, 'save-to-feishu.md');
       const workflowContent = readFileSync(markdownPath, 'utf-8');
       
-      const today = new Date().toISOString().split('T')[0];
-      const todayTimestamp = new Date(today).getTime();
       const currentDatetime = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+      const dailyNoteTableUrl = 'https://c16lk2ssrm.feishu.cn/wiki/BCZqwHTeAiJcqukfuSbc75z5nMh';
       
       const processedContent = workflowContent
-        .replace(/\{\{current_date_timestamp\}\}/g, `${todayTimestamp}`)
-        .replace(/\{\{current_datetime\}\}/g, currentDatetime);
+        .replace(/\{\{current_datetime\}\}/g, currentDatetime)
+        .replace(/\{\{daily_note_table_url\}\}/g, dailyNoteTableUrl);
 
       return {
         messages: [

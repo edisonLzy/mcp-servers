@@ -9,7 +9,8 @@
 ```json
 {
   "app_token": "WGHcbBFFEaXV9qsZN6ecbCmCnfh",
-  "table_id": "tbljmyT87cIlcMBz"
+  "table_id": "tbljmyT87cIlcMBz",
+  "url": "https://c16lk2ssrm.feishu.cn/wiki/BCZqwHTeAiJcqukfuSbc75z5nMh"
 }
 ```
 
@@ -141,7 +142,6 @@
   "app_token": "WGHcbBFFEaXV9qsZN6ecbCmCnfh",
   "table_id": "tbljmyT87cIlcMBz",
   "fields": {
-    "日期": {{current_date_timestamp}},
     "内容": "{{record_summary_or_title}}",
     "文档链接": "{{document_url}}"
   }
@@ -149,9 +149,10 @@
 ```
 
 **字段说明：**
-- `日期`：当前日期的时间戳（毫秒）
 - `内容`：用户提供的摘要，如未提供则使用文档标题
 - `文档链接`：新创建文档的URL
+
+**注意：** `日期` 字段会由飞书多维表格自动生成，无需手动指定
 
 **错误处理：**
 - 如果插入记录失败：警告用户"文档已创建，但多维表格记录创建失败，错误信息：[具体错误]"
@@ -179,7 +180,7 @@
 
 🔗 快速访问：
 - 文档链接：{{document_url}}
-- 表格链接：https://c16lk2ssrm.feishu.cn/wiki/BCZqwHTeAiJcqukfuSbc75z5nMh
+- 表格链接：{{daily_note_table_url}}
 ```
 
 如果多维表格记录创建失败，仍然提供文档信息和URL。
