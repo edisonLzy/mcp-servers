@@ -53,13 +53,13 @@ ${workflowContent}
 ## 工作流程
 
 ### 1. 确认环境信息
-- 获取当前分支：\`git branch --show-current\`
+- 获取当前分支：`git branch --show-current`
 - 确认基线分支（默认 master）
 - 确认问题描述
 
 ### 2. 分析代码变更
-- 获取变更文件：\`git diff --name-status <基线分支>...<当前分支>\`
-- 查看详细变更：\`git diff <基线分支>...<当前分支> -- <文件路径>\`
+- 获取变更文件：`git diff --name-status <基线分支>...<当前分支>`
+- 查看详细变更：`git diff <基线分支>...<当前分支> -- <文件路径>`
 - 识别与问题相关的关键变更
 
 ### 3. 问题定位
