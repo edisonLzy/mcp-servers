@@ -5,6 +5,7 @@ import { registerGhCodeReviewPrompt } from './prompts/gh-code-review.js';
 import { registerGhAutoMrFlowPrompt } from './prompts/gh-auto-mr-flow.js';
 import { registerGitWorktreeDevelopmentPrompt } from './prompts/git-worktree-development.js';
 import { registerGitCommitWorkflowPrompt } from './prompts/git-commit-workflow.js';
+import { registerIterationTestingWorkflowPrompt } from './prompts/iteration-testing-workflow.js';
 import type { MCPServerOptions } from '../../types.js';
 
 async function runPromptsMCP(): Promise<void> {
@@ -27,6 +28,7 @@ async function runPromptsMCP(): Promise<void> {
   registerGhAutoMrFlowPrompt(server);
   registerGitWorktreeDevelopmentPrompt(server);
   registerGitCommitWorkflowPrompt(server);
+  registerIterationTestingWorkflowPrompt(server);
 
   // Start receiving messages on stdin and sending messages on stdout
   const transport = new StdioServerTransport();
