@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0] - 2025-11-11
+
+### Features
+
+- **prompts-mcp**: add iteration testing workflow (da017e9)
+
 ## [0.5.0] - 2025-10-23
 
 ### Features
