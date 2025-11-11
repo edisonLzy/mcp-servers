@@ -1,5 +1,15 @@
 # Save to Feishu Workflow
 
+请严格按照以下workflow的步骤执行，在每个步骤完成后提供详细的反馈。
+
+特别注意：
+1. 如果用户未指定保存路径，先使用list-wiki-spaces获取知识空间列表并向用户澄清
+2. 确保文档成功创建后再插入多维表格记录
+3. 即使多维表格记录创建失败，也要提供文档的访问链接
+4. 保持内容块的正确顺序
+
+请开始执行工作流程，首先询问用户需要保存的内容和标题。
+
 ## 概述
 将用户提供的内容保存到飞书文档中，同时在Daily Note多维表格中插入一条记录，方便后续管理和检索。
 
@@ -168,19 +178,19 @@
 ✅ 内容已成功保存到飞书！
 
 📄 文档信息：
-- 标题：{{document_title}}
-- URL：{{document_url}}
-- 父文档：{{parent_document_title}}
-- 所属空间：{{space_name}}
+- 标题：[文档标题]
+- URL：[文档URL]
+- 父文档：[父文档标题]
+- 所属空间：[空间名称]
 
 📊 多维表格记录：
 - 表格：Daily Note
-- 记录ID：{{record_id}}
-- 记录时间：{{current_datetime}}
+- 记录ID：[记录ID]
+- 记录时间：[当前时间]
 
 🔗 快速访问：
-- 文档链接：{{document_url}}
-- 表格链接：{{daily_note_table_url}}
+- 文档链接：[文档URL]
+- 表格链接：https://c16lk2ssrm.feishu.cn/wiki/BCZqwHTeAiJcqukfuSbc75z5nMh
 ```
 
 如果多维表格记录创建失败，仍然提供文档信息和URL。
