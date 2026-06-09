@@ -1,26 +1,16 @@
----
-name: retrieve-topic
-description: Locate the most relevant topic directory in the Obsidian knowledge tree based on a search query.
----
-
-# Retrieve Topic
-
-## Framework Context
-
-See [Framework Structure](../../references/framework-structure.md) for the canonical Obsidian knowledge tree structure definition.
-
-## Configuration
-
-See [Configuration Check Flow](../../references/config-check-flow.md) before executing this skill.
-
----
-
-# Subskill: Retrieve Topic Node
+# Retrieve Topic Node
 
 ## Goal
 
 Locate the most relevant topic directory in the knowledge tree based on the user's request.
 Following the progressive disclosure principle, traversal starts from the vault root and descends layer by layer, with user confirmation at each proposed match.
+
+## Runtime Environment
+
+本 Skill 由主 Agent 调用，dispatch 一个 **general-purpose subagent** 来执行实际的检索操作。
+- 主 Agent 负责任务分发和结果聚合
+- Subagent 执行目录遍历和关键词匹配
+- Subagent 仅返回检索结果，不做决策
 
 ## Input
 
@@ -29,8 +19,8 @@ Following the progressive disclosure principle, traversal starts from the vault 
 
 ## Constraints
 
-- Maximum traversal depth: **3 layers** from vault root
-- If no topic is confirmed within 3 layers, report that no matching topic was found
+- Maximum traversal depth: **6 layers** from vault root
+- If no topic is confirmed within 6 layers, report that no matching topic was found
 
 ## Execution Steps
 
@@ -41,7 +31,7 @@ flowchart TD
     A[Start: vault root, depth=1] --> B[Read current README.md]
     B --> C[Scan subdirectories]
     C --> D{Any subdirs match query?}
-    D -->|No match| E{depth >= 3?}
+    D -->|No match| E{depth >= 6?}
     E -->|Yes| F[Report: no matching topic found]
     E -->|No| G[Inform user: no match at this level\nAsk if they want to specify a path manually]
     G -->|User provides path| H[Jump to that path]
@@ -51,7 +41,7 @@ flowchart TD
     I --> J[Present top candidates to user via AskUser]
     J --> K{User confirms a candidate?}
     K -->|Yes| L[✅ Return confirmed topic path]
-    K -->|No / drill deeper| M{depth >= 3?}
+    K -->|No / drill deeper| M{depth >= 6?}
     M -->|Yes| F
     M -->|No| N[Move into selected subdirectory, depth++]
     N --> B
@@ -106,15 +96,15 @@ Which topic are you looking for? Select a number to confirm, or "more" to drill 
 
 If no candidates were found **or** the user rejected all candidates:
 
-- If `depth < 3`: inform the user that no match was found at this level, and ask if they want to manually specify a subdirectory path to continue searching. If they provide a path, jump there and continue. If not, stop.
-- If `depth >= 3`: report that the topic was not found within 3 layers and stop.
+- If `depth < 6`: inform the user that no match was found at this level, and ask if they want to manually specify a subdirectory path to continue searching. If they provide a path, jump there and continue. If not, stop.
+- If `depth >= 6`: report that the topic was not found within 6 layers and stop.
 
 ```
-⚠️ No matching topic found within 3 layers of the knowledge tree.
+⚠️ No matching topic found within 6 layers of the knowledge tree.
 
 You may try:
 - Rephrasing your query
-- Manually browsing the vault with: tree -L 3 -d <vault_path>
+- Manually browsing the vault with: tree -L 6 -d <vault_path>
 - Creating a new topic with the "create topic" skill
 ```
 
@@ -131,12 +121,12 @@ README.md summary:
 
 ## Acceptance Criteria
 
-- [ ] Traversal starts from vault root and respects the 3-layer depth limit
+- [ ] Traversal starts from vault root and respects the 6-layer depth limit
 - [ ] Each layer reads subdirectory READMEs for keyword matching
 - [ ] Candidates are ranked by relevance before presenting to user
 - [ ] User is asked to confirm (or reject) at every proposed match via AskUser
 - [ ] Confirmed topic path is returned immediately upon user confirmation
-- [ ] If no match within 3 layers, a helpful "not found" message is shown
+- [ ] If no match within 6 layers, a helpful "not found" message is shown
 - [ ] Manual path override is supported when no automatic match is found
 
 ## Helper Tools

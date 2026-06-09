@@ -1,21 +1,4 @@
----
-name: create-topic
-description: Create a new topic (or sub-topic) directory in the Obsidian knowledge tree with README.md and FAQ.md initialization.
----
-
-# Create Topic
-
-## Framework Context
-
-See [Framework Structure](../../references/framework-structure.md) for the canonical Obsidian knowledge tree structure definition.
-
-## Configuration
-
-See [Configuration Check Flow](../../references/config-check-flow.md) before executing this skill.
-
----
-
-# Subskill: Create Topic Node
+# Create Topic Node
 
 ## Goal
 
